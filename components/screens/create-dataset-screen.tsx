@@ -12,9 +12,10 @@ export function CreateDatasetScreen() {
   const router = useRouter();
 
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [domain, setDomain] = useState("");
   const [sensitivity, setSensitivity] = useState("internal");
-  const [freshness, setFreshness] = useState("monthly");
+  const [freshness, setFreshness] = useState("balanced");
   const [executionTier, setExecutionTier] = useState("standard");
   const [webFallback, setWebFallback] = useState(false);
   const [modelRetrieval, setModelRetrieval] = useState(true);
@@ -25,17 +26,16 @@ export function CreateDatasetScreen() {
   };
 
   const sensitivityOptions = [
+    { value: "public", label: "Public", desc: "Open, non-sensitive data" },
     { value: "internal", label: "Internal", desc: "General internal use" },
     { value: "confidential", label: "Confidential", desc: "Limited access" },
     { value: "restricted", label: "Restricted", desc: "Strict controls" },
   ];
 
   const freshnessOptions = [
-    { value: "daily", label: "Daily" },
-    { value: "weekly", label: "Weekly" },
-    { value: "monthly", label: "Monthly" },
-    { value: "quarterly", label: "Quarterly" },
-    { value: "ad hoc", label: "Ad hoc" },
+    { value: "stable", label: "Stable", desc: "Content rarely changes" },
+    { value: "balanced", label: "Balanced", desc: "Moderate refresh cycle" },
+    { value: "aggressive", label: "Aggressive", desc: "Frequent updates expected" },
   ];
 
   const tierOptions = [
@@ -92,13 +92,19 @@ export function CreateDatasetScreen() {
                   value={domain}
                   onChange={(e) => setDomain(e.target.value)}
                 />
+                <Input
+                  label="Description (Optional)"
+                  placeholder="Briefly describe what this dataset contains..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
               </div>
             </Card>
 
             {/* Sensitivity */}
             <Card variant="glass" className="rounded-2xl">
               <h2 className="text-base font-semibold text-foreground mb-5">Sensitivity level</h2>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {sensitivityOptions.map((opt) => (
                   <button
                     key={opt.value}
@@ -123,19 +129,20 @@ export function CreateDatasetScreen() {
             {/* Freshness profile */}
             <Card variant="glass" className="rounded-2xl">
               <h2 className="text-base font-semibold text-foreground mb-5">Freshness profile</h2>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {freshnessOptions.map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() => setFreshness(opt.value)}
-                    className={`rounded-lg border px-4 py-2.5 text-[13px] font-medium transition-all duration-200 ${
+                    className={`flex flex-col items-start gap-1 rounded-xl border p-3.5 text-left transition-all duration-200 ${
                       freshness === opt.value
-                        ? "border-foreground/30 bg-foreground/[0.06] text-foreground"
-                        : "border-border/30 text-muted-foreground hover:bg-foreground/[0.02]"
+                        ? "border-foreground/30 bg-foreground/[0.06] shadow-sm"
+                        : "border-border/30 bg-foreground/[0.01] hover:bg-foreground/[0.03]"
                     }`}
                   >
-                    {opt.label}
+                    <span className="text-[13px] font-semibold text-foreground">{opt.label}</span>
+                    <span className="text-[11px] text-muted-foreground">{opt.desc}</span>
                   </button>
                 ))}
               </div>

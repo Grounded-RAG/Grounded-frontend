@@ -49,8 +49,8 @@ function MessageTrustReview({ run }: { run: any }) {
                             {i + 1}
                          </div>
                          <div>
-                            <p className="text-[13px] leading-relaxed text-foreground/90">&ldquo;{cite.snippet}&rdquo;</p>
-                            <p className="mt-1 text-[11px] text-muted-foreground">Source: {cite.document_name}</p>
+                            <p className="text-[13px] leading-relaxed text-foreground/90">&ldquo;{cite.quote}&rdquo;</p>
+                            <p className="mt-1 text-[11px] text-muted-foreground">Chunk {cite.chunk_index} · {cite.document_id}</p>
                          </div>
                       </div>
                     ))}
@@ -165,8 +165,8 @@ export function AgentChatScreen({ id }: { id: string }) {
                        <div className="relative group/dropdown">
                           <select className="appearance-none bg-foreground/[0.04] border border-border/20 text-foreground text-[10px] font-medium rounded-full py-1 pl-2.5 pr-6 cursor-pointer outline-none focus:ring-1 focus:ring-foreground/20 transition-all hover:bg-foreground/[0.08]">
                              {capabilities.map((mode) => (
-                                <option key={mode.mode} value={mode.mode} disabled={!mode.enabled}>
-                                   {mode.label} {!mode.enabled ? "(Waitlist)" : ""}
+                                <option key={mode.mode} value={mode.mode}>
+                                   {mode.label}
                                 </option>
                              ))}
                           </select>

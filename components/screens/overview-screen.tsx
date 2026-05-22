@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowRight, Bot, CheckCircle2, Clock, Database, Zap, Activity } from "lucide-react";
-import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -109,21 +108,21 @@ export function OverviewScreen({ workspaceSlug }: { workspaceSlug?: string }) {
             <p className="text-[13px] text-muted-foreground/70 font-light">Available processing engines for your agents.</p>
           </div>
           <div className="grid gap-2">
-            {capabilities.slice(0, 3).map((mode) => (
+            {capabilities.map((mode) => (
               <div className="flex items-center justify-between rounded-2xl border border-border/20 bg-foreground/[0.02] p-3 hover:bg-foreground/[0.04] transition-colors" key={mode.mode}>
                 <div>
                   <p className="text-[13px] font-semibold text-foreground">{mode.label}</p>
                   <p className="text-[11px] text-muted-foreground/60">{mode.description}</p>
                 </div>
                 <Badge tone={mode.enabled ? "success" : "neutral"} dot size="sm" className="h-5 px-2 text-[10px] shrink-0">
-                  {mode.enabled ? "Live" : "Waitlist"}
+                  {mode.enabled ? "Live" : "Restricted"}
                 </Badge>
               </div>
             ))}
           </div>
         </Card>
 
-        {/* Recent Datasets (Spans 2 cols) */}
+        {/* Recent Activity (Spans 2 cols) */}
         <Card variant="glass" className="md:col-span-3 lg:col-span-2 rounded-[2rem] p-6 sm:p-8">
            <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
@@ -151,7 +150,7 @@ export function OverviewScreen({ workspaceSlug }: { workspaceSlug?: string }) {
                     </div>
                     <div className="flex flex-col items-end gap-1">
                        <Badge tone="success" dot size="sm" className="h-4 text-[9px]">Success</Badge>
-                       <span className="text-[10px] text-muted-foreground/50">{run.latency_ms}ms</span>
+                       <span className="text-[10px] text-muted-foreground/50">{run.total_latency_ms}ms</span>
                     </div>
                   </div>
                 </Link>

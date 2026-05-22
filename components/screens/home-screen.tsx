@@ -1,10 +1,22 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, ArrowUpRight, FileText, Lock, Layers, Terminal } from "lucide-react";
 import { BrandMark } from "@/components/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { capabilities } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
+
+const builtForItems = [
+  "Legal ops teams",
+  "Policy analysts",
+  "Research desks",
+  "Compliance reviewers",
+  "Support operations",
+  "Risk management",
+  "Internal audit",
+  "Knowledge management",
+];
 
 export function HomeScreen() {
   return (
@@ -31,32 +43,49 @@ export function HomeScreen() {
       </header>
 
       {/* ─── Hero ─── */}
-      <section className="relative z-10 mx-auto max-w-6xl px-6 pt-28 pb-20 sm:pt-36 sm:pb-28">
-        <div className="max-w-3xl">
-          <p className="text-[13px] font-semibold text-muted-foreground tracking-wide uppercase mb-6">
-            Document-backed intelligence
-          </p>
+      <section className="relative z-10 mx-auto max-w-6xl px-6 pt-24 pb-16 sm:pt-32 sm:pb-20">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+          {/* Left — copy */}
+          <div className="max-w-xl">
+            <p className="text-[13px] font-semibold text-muted-foreground tracking-wide uppercase mb-6">
+              Document-backed intelligence
+            </p>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
-            Stop guessing.<br />
-            Start citing.
-          </h1>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
+              Stop guessing.<br />
+              Start citing.
+            </h1>
 
-          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-xl mb-10">
-            Grounded connects your LLMs to your actual documents — every answer comes with sentence-level citations back to your source material.
-          </p>
+            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-xl mb-10">
+              Grounded connects your LLMs to your actual documents — every answer comes with sentence-level citations back to your source material.
+            </p>
 
-          <div className="flex items-center gap-5">
-            <Link href="/sign-up">
-              <Button size="lg" className="h-12 px-7 text-[15px] rounded-lg shadow-sm">
-                Start building
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </Link>
-            <Link href="#how-it-works" className="text-[14px] font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
-              See how it works
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
+            <div className="flex items-center gap-5">
+              <Link href="/sign-up">
+                <Button size="lg" className="h-12 px-7 text-[15px] rounded-lg shadow-sm">
+                  Start building
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+              <Link href="#how-it-works" className="text-[14px] font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+                See how it works
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Right — product image */}
+          <div className="relative flex justify-center lg:justify-end">
+            {/* Glow behind image */}
+            <div className="absolute inset-0 bg-foreground/[0.03] rounded-[3rem] blur-[60px] scale-90 pointer-events-none" />
+            <Image
+              src="/hero-product.png"
+              alt="Grounded product — document intelligence with citations"
+              width={580}
+              height={580}
+              className="relative z-10 w-full max-w-[540px] h-auto drop-shadow-2xl rounded-2xl"
+              priority
+            />
           </div>
         </div>
 
@@ -65,20 +94,23 @@ export function HomeScreen() {
         <div className="absolute top-44 right-16 w-32 h-px bg-gradient-to-r from-border/60 to-transparent hidden lg:block" />
       </section>
 
-      {/* ─── Social proof strip ─── */}
-      <section className="relative z-10 border-y border-border/20">
-        <div className="mx-auto max-w-6xl px-6 py-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-16">
+      {/* ─── Social proof strip — scrolling marquee ─── */}
+      <section className="relative z-10 border-y border-border/20 overflow-hidden">
+        <div className="mx-auto max-w-6xl px-6 py-5 flex items-center gap-10">
           <p className="text-[13px] text-muted-foreground/60 font-medium uppercase tracking-wider shrink-0">Built for</p>
-          <div className="flex flex-wrap items-center gap-x-10 gap-y-3 text-[14px] font-medium text-muted-foreground/80">
-            <span>Legal ops teams</span>
-            <span className="hidden sm:inline text-border/40">·</span>
-            <span>Policy analysts</span>
-            <span className="hidden sm:inline text-border/40">·</span>
-            <span>Research desks</span>
-            <span className="hidden sm:inline text-border/40">·</span>
-            <span>Compliance reviewers</span>
-            <span className="hidden sm:inline text-border/40">·</span>
-            <span>Support operations</span>
+          <div className="overflow-hidden flex-1 relative">
+            {/* Fade edges */}
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+            {/* Scrolling content — duplicated for seamless loop */}
+            <div className="animate-marquee flex items-center gap-8 whitespace-nowrap w-max">
+              {[...builtForItems, ...builtForItems].map((item, i) => (
+                <span key={`${item}-${i}`} className="flex items-center gap-3 text-[14px] font-medium text-muted-foreground/80">
+                  <span className="h-1 w-1 rounded-full bg-muted-foreground/30 shrink-0" />
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -101,7 +133,7 @@ export function HomeScreen() {
               {
                 step: "01",
                 title: "Upload your documents",
-                desc: "PDF, DOCX, CSV — drag them into a dataset. We index, chunk, and track provenance automatically.",
+                desc: "PDF, DOCX, TXT — drag them into a dataset. We index, chunk, and track provenance automatically.",
               },
               {
                 step: "02",
@@ -182,7 +214,7 @@ export function HomeScreen() {
             </div>
 
             <div className="grid gap-3">
-              {capabilities.map((mode, i) => (
+              {capabilities.map((mode) => (
                 <div
                   key={mode.mode}
                   className="flex items-center justify-between rounded-xl border border-border/25 bg-foreground/[0.015] p-5 transition-colors hover:bg-foreground/[0.03]"
@@ -192,10 +224,10 @@ export function HomeScreen() {
                     <p className="mt-1 text-[13px] text-muted-foreground">{mode.description}</p>
                   </div>
                   <Badge
-                    tone={mode.enabled ? "success" : mode.availability_reason === "coming_soon" ? "warn" : "neutral"}
+                    tone="success"
                     dot size="sm" className="ml-4 shrink-0"
                   >
-                    {mode.enabled ? "Live" : mode.availability_reason === "coming_soon" ? "Coming soon" : "Restricted"}
+                    Live
                   </Badge>
                 </div>
               ))}

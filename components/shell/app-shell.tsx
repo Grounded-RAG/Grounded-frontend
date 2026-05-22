@@ -11,20 +11,21 @@ import {
   ChevronLeft,
   CreditCard,
   Database,
-  Eye,
   KeyRound,
   LayoutDashboard,
   LogOut,
   Menu,
   MessageSquareText,
   Settings,
+  ShieldCheck,
+  Users,
   X,
 } from "lucide-react";
 import { BrandMark } from "@/components/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { tenant, workspaces } from "@/lib/mock-data";
+import { organization, workspaces } from "@/lib/mock-data";
 import { cn, workspaceHref } from "@/lib/utils";
 
 const navGroups = [
@@ -32,18 +33,24 @@ const navGroups = [
     label: "Workspace",
     items: [
       { label: "Overview", icon: LayoutDashboard, path: "/overview" },
-      { label: "Agents", icon: Bot, path: "/agents" },
       { label: "Datasets", icon: Database, path: "/datasets" },
+      { label: "Agents", icon: Bot, path: "/agents" },
       { label: "Runs", icon: Activity, path: "/runs" },
     ],
   },
   {
     label: "Analytics",
     items: [
-      { label: "Monitoring", icon: Eye, path: "/monitoring", coming: true },
-      { label: "Feedback", icon: MessageSquareText, path: "/feedback", coming: true },
-      { label: "Usage", icon: BarChart3, path: "/usage", coming: true },
-      { label: "Billing", icon: CreditCard, path: "/billing", coming: true },
+      { label: "Usage", icon: BarChart3, path: "/usage" },
+      { label: "Feedback", icon: MessageSquareText, path: "/feedback" },
+      { label: "Billing", icon: CreditCard, path: "/billing" },
+    ],
+  },
+  {
+    label: "Organization",
+    items: [
+      { label: "Team", icon: Users, path: "/team" },
+      { label: "Governance", icon: ShieldCheck, path: "/governance" },
     ],
   },
   {
@@ -51,7 +58,7 @@ const navGroups = [
     items: [
       { label: "Settings", icon: Settings, path: "/settings" },
       { label: "API Keys", icon: KeyRound, path: "/api-keys" },
-      { label: "Docs", icon: BookOpen, path: "#", coming: true },
+      { label: "Docs", icon: BookOpen, path: "https://docs.grounded.ai", external: true },
     ],
   },
 ];
@@ -70,7 +77,7 @@ export function AppShell({
     () => workspaces.find((w) => w.slug === workspaceSlug) ?? workspaces[0],
     [workspaceSlug],
   );
-  const isChat = /\/agents\/[^/]+$/.test(pathname);
+  const isChat = /\/agents\/[^/]+$/.test(pathname) && !pathname.endsWith('/agents/new');
   const expanded = isChat ? false : sidebarOpen;
 
   const sidebarContent = (
@@ -96,12 +103,15 @@ export function AppShell({
             <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
-                const href = item.coming ? "#" : workspaceHref(workspaceSlug, item.path);
-                const active = !item.coming && pathname.startsWith(href);
+                const isExternal = "external" in item && item.external;
+                const href = isExternal ? (item as any).path : workspaceHref(workspaceSlug, item.path);
+                const active = !isExternal && pathname.startsWith(href);
                 return (
                   <Link
                     href={href}
                     key={item.label}
+                    target={isExternal ? "_blank" : undefined}
+                    rel={isExternal ? "noopener noreferrer" : undefined}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       "group relative flex items-center gap-3 rounded-xl transition-all duration-200",
@@ -109,7 +119,6 @@ export function AppShell({
                       active
                         ? "bg-foreground/[0.04] text-foreground font-semibold shadow-sm"
                         : "text-muted-foreground/80 hover:bg-foreground/[0.03] hover:text-foreground",
-                      item.coming && "cursor-default opacity-40 hover:bg-transparent",
                     )}
                   >
                     {active && expanded && (
@@ -117,10 +126,7 @@ export function AppShell({
                     )}
                     <Icon className={cn("shrink-0 transition-transform duration-200", expanded ? "h-[18px] w-[18px]" : "h-5 w-5", active && !expanded && "text-foreground")} />
                     {expanded && (
-                      <>
-                        <span className="flex-1 truncate text-[13px]">{item.label}</span>
-                        {item.coming && <Badge tone="neutral" size="sm" className="h-5 px-1.5 text-[9px] uppercase tracking-wider">Soon</Badge>}
-                      </>
+                      <span className="flex-1 truncate text-[13px]">{item.label}</span>
                     )}
                     {!expanded && active && (
                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-r-full bg-foreground shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
@@ -199,7 +205,7 @@ export function AppShell({
             </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
-              <Badge tone="accent" size="sm" className="hidden sm:flex text-[10px] uppercase tracking-wider">{tenant.subscription_plan}</Badge>
+              <Badge tone="accent" size="sm" className="hidden sm:flex text-[10px] uppercase tracking-wider">{organization.subscription_plan}</Badge>
               <div className="h-4 w-px bg-border/40 hidden sm:block" />
               <ThemeToggle />
               <Link href="/login">

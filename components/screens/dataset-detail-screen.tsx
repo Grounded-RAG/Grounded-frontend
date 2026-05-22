@@ -1,6 +1,7 @@
-import { AlertTriangle, FileText, UploadCloud } from "lucide-react";
+import { AlertTriangle, FileText, RefreshCw, UploadCloud } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { DocumentStatusBadge } from "@/components/ui/status";
 import { ProgressBar } from "@/components/ui/progress";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -24,7 +25,7 @@ export function DatasetDetailScreen({ id }: { id: string }) {
             <div className="grid place-items-center rounded-2xl border border-dashed border-border/30 bg-secondary/8 p-10 text-center transition-colors hover:border-foreground/15 hover:bg-secondary/15">
               <UploadCloud className="h-8 w-8 text-muted-foreground/30" />
               <p className="mt-3 text-sm font-medium text-foreground">Drag files here or click to upload</p>
-              <p className="mt-1 text-xs text-muted-foreground">PDF, DOCX, CSV, TXT supported.</p>
+              <p className="mt-1 text-xs text-muted-foreground">.txt, .pdf, .docx supported — max 50 MB</p>
             </div>
           </Card>
 
@@ -44,6 +45,12 @@ export function DatasetDetailScreen({ id }: { id: string }) {
                       </div>
                     </div>
                     <DocumentStatusBadge status={doc.status} />
+                    {(doc.status === "failed" || doc.status === "indexed") && (
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs rounded-lg">
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Reindex
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>

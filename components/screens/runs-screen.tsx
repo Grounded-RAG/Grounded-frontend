@@ -48,11 +48,11 @@ export function RunsScreen() {
               <CardHeader title={selected.query} eyebrow={selected.run_id} />
               <p className="leading-relaxed text-sm text-foreground/80">{selected.answer}</p>
               <div className="mt-5 grid gap-3 rounded-xl border border-border/10 bg-secondary/8 p-4 sm:grid-cols-3">
-                <DetailRow label="Effective tier" value={selected.effective_tier} />
+                <DetailRow label="Execution depth" value={selected.effective_tier} />
                 <DetailRow label="Latency" value={`${selected.total_latency_ms}ms`} />
                 <DetailRow label="Provider" value={selected.generator_provider} />
                 <DetailRow label="Mode" value={selected.selected_mode ?? "auto"} />
-                <DetailRow label="Requested tier" value={selected.requested_tier ?? "—"} />
+                <DetailRow label="Requested depth" value={selected.requested_tier ?? "—"} />
                 <DetailRow label="Fallback" value={selected.provider_fallback_used ? `from ${selected.provider_fallback_from}` : "None"} />
               </div>
             </Card>

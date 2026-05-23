@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -86,9 +87,20 @@ export function AppShell({
         {expanded ? (
           <BrandMark size="sm" />
         ) : (
-          <div className="h-8 w-8 rounded-xl bg-foreground text-background flex items-center justify-center font-bold text-sm">
-            G
-          </div>
+          <Link
+            href="/"
+            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border/30 bg-card shadow-sm transition-transform duration-200 hover:scale-105"
+            aria-label="Grounded home"
+          >
+            <Image
+              src="/Grounded_light_logo.jpg"
+              alt="Grounded"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded-lg object-cover"
+              priority
+            />
+          </Link>
         )}
       </div>
 

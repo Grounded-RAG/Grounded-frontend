@@ -3,34 +3,52 @@ export type UserFacingMode = "auto" | "instant" | "thinking" | "verified";
 export type VerificationStatus = "passed" | "degraded";
 export type ConfidenceLabel = "low" | "medium" | "high";
 export type SupportSummary = "grounded" | "partial" | "insufficient";
-export type IngestionJobStatus = "queued" | "running" | "indexed" | "failed" | "dead_letter";
-export type DocumentStatus = "uploaded" | "processing" | "indexed" | "failed" | "archived";
+export type IngestionJobStatus = "queued" | "running" | "indexed" | "failed";
+export type DocumentStatus = "uploaded" | "processing" | "indexed" | "failed";
 export type SensitivityLevel = "public" | "internal" | "confidential" | "restricted";
 export type FreshnessProfile = "stable" | "balanced" | "aggressive";
 export type AgentStatus = "active" | "archived";
-export type MessageRole = "user" | "assistant" | "system";
+export type MessageRole = "user" | "assistant";
 export type GroundingPolicy = "strict" | "balanced" | "live";
-export type SubscriptionPlan = "Free" | "Pro" | "Business" | "Enterprise";
 export type FeedbackStatus = "new" | "triaged" | "resolved";
 export type FeedbackRating = "positive" | "negative" | "neutral";
+
+export interface AuthSmokeResponse {
+  status: string;
+  tenant_id: string;
+  tenant_name: string;
+  subscription_plan: string;
+  max_execution_tier: ExecutionTier;
+  api_key_id: string;
+  api_key_label: string;
+}
+
+export interface EmailAuthResponse extends AuthSmokeResponse {
+  api_key: string;
+  workspace_id: string;
+  workspace_name: string;
+  workspace_slug: string;
+  created_tenant: boolean;
+  created_workspace: boolean;
+}
 
 export interface Workspace {
   workspace_id: string;
   name: string;
   slug: string;
-  description: string;
+  description: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface Dataset {
   dataset_id: string;
-  workspace_id: string;
+  workspace_id: string | null;
   name: string;
-  description?: string;
+  description?: string | null;
   domain: string;
-  sensitivity_level: SensitivityLevel;
-  freshness_profile: FreshnessProfile;
+  sensitivity_level: SensitivityLevel | string;
+  freshness_profile: FreshnessProfile | string;
   min_execution_tier: ExecutionTier;
   allow_web_fallback: boolean;
   allow_internal_model_retrieval: boolean;
@@ -40,7 +58,7 @@ export interface Dataset {
 export interface DatasetDocument {
   document_id: string;
   dataset_id: string;
-  title: string;
+  title: string | null;
   mime_type: string;
   file_size_bytes: number;
   status: DocumentStatus;
@@ -60,16 +78,29 @@ export interface IngestionJob {
   created_at: string;
 }
 
+export interface DatasetUploadResponse {
+  dataset_id: string;
+  document_id: string;
+  job_id: string;
+  filename: string;
+  title: string;
+  mime_type: string;
+  file_size_bytes: number;
+  document_status: DocumentStatus;
+  job_status: IngestionJobStatus;
+  already_exists: boolean;
+}
+
 export interface Agent {
   agent_id: string;
   workspace_id: string;
   name: string;
-  description: string;
+  description: string | null;
   system_instructions: string;
   default_mode: UserFacingMode;
   allowed_modes: UserFacingMode[];
-  grounding_policy: GroundingPolicy;
-  status: AgentStatus;
+  grounding_policy?: GroundingPolicy;
+  status: AgentStatus | string;
   dataset_ids: string[];
   created_at: string;
   updated_at: string;
@@ -133,13 +164,51 @@ export interface Message {
   created_at: string;
 }
 
+export interface AgentChatResponse {
+  answer: string;
+  citations: Citation[];
+  confidence_score: number;
+  confidence_label: ConfidenceLabel;
+  support_summary: SupportSummary;
+  verification_status: VerificationStatus;
+  degraded_reasons: string[];
+  generator_provider: string;
+  provider_backend: string;
+  provider_model: string | null;
+  provider_fallback_used: boolean;
+  provider_fallback_from: string | null;
+  agent_id: string;
+  conversation_id: string;
+  dataset_id: string;
+  mode: UserFacingMode;
+  run_id: string;
+  user_message_id: string;
+  assistant_message_id: string;
+}
+
 export interface ModeCapability {
   mode: UserFacingMode;
   label: string;
   enabled: boolean;
   backing_tier: ExecutionTier | null;
   description: string;
-  availability_reason: string | null;
+  availability_reason: "coming_soon" | "plan_restricted" | "tier_restricted" | null;
+}
+
+export interface FeatureCapability {
+  key: string;
+  enabled: boolean;
+  description: string;
+  availability_reason: "coming_soon" | "plan_restricted" | "tier_restricted" | null;
+}
+
+export interface CapabilitiesResponse {
+  subscription_plan: string;
+  max_execution_tier: ExecutionTier;
+  default_mode: UserFacingMode;
+  manual_mode_override_allowed: boolean;
+  modes: ModeCapability[];
+  features: FeatureCapability[];
 }
 
 export interface ApiKey {
@@ -150,6 +219,10 @@ export interface ApiKey {
   created_at: string;
 }
 
+export interface ApiKeyCreateResponse extends ApiKey {
+  api_key: string;
+}
+
 export interface DashboardSummary {
   dataset_count: number;
   document_count: number;
@@ -158,6 +231,20 @@ export interface DashboardSummary {
   failed_job_count: number;
   agent_count: number;
   conversation_count: number;
+}
+
+export interface DashboardRecentJob {
+  job_id: string;
+  document_id: string;
+  dataset_id: string;
+  document_title: string | null;
+  status: IngestionJobStatus;
+  attempt_count: number;
+  error_code: string | null;
+  error_detail: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
 }
 
 export interface FeedbackEntry {
@@ -184,8 +271,6 @@ export interface TeamMember {
   invited_at: string;
   joined_at: string | null;
 }
-
-
 
 export interface Invoice {
   invoice_id: string;

@@ -66,18 +66,55 @@ function MessageTrustReview({ run }: { run: (typeof runs)[number] }) {
   );
 }
 
-const docLines = [
-  "SAMRAWIT GEBREMARYAM BAHTA",
-  "Software Engineer",
-  "",
-  "EXPERIENCE",
-  "Senior Developer · Tech Corp · 2022–Present",
-  "• Led document intelligence platform rollout",
-  "• Built RAG pipelines with citation grounding",
-  "",
-  "EDUCATION",
-  "BSc Computer Science · 2018",
-];
+const sourceDocument = {
+  title: "Workspace-Access-Policy.pdf",
+  lines: [
+    { text: "WORKSPACE ACCESS POLICY" },
+    { text: "Acme Research · Confidential" },
+    { text: "Effective April 4, 2026" },
+    { text: "" },
+    { text: "§4 Temporary & contractor access" },
+    { text: "" },
+    { text: "4.1 Eligibility" },
+    {
+      text: "Approved contractors may receive temporary workspace access when a documented business need exists and a full-time owner sponsors the request.",
+    },
+    { text: "" },
+    { text: "4.2 Approval requirements" },
+    {
+      text: "Temporary access exceptions require owner approval and a scheduled review date.",
+      highlight: true,
+    },
+    {
+      text: "Access must not exceed ninety (90) days unless Information Security grants an extension.",
+      highlight: true,
+    },
+    { text: "" },
+    { text: "4.3 Provisioning" },
+    {
+      text: "Contractors must complete security training before credentials are issued. Extensions use Form A-113.",
+    },
+    { text: "" },
+    { text: "§5 Audit" },
+    { text: "Quarterly access reviews are mandatory. Expired accounts are disabled within 24 hours." },
+  ],
+};
+
+function SourceDocLine({ line }: { line: { text: string; highlight?: boolean } }) {
+  if (!line.text) {
+    return <div className="h-2" aria-hidden />;
+  }
+
+  if (line.highlight) {
+    return (
+      <div className="my-2 w-full rounded-md border border-border/60 bg-muted px-3.5 py-2.5 text-[13px] leading-relaxed text-foreground">
+        {line.text}
+      </div>
+    );
+  }
+
+  return <p className="text-[13px] leading-snug text-foreground/85">{line.text}</p>;
+}
 
 export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSlug?: string }) {
   const agent = agents.find((a) => a.agent_id === id) ?? agents[0];
@@ -200,7 +237,7 @@ export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSl
 
       <div className="hidden w-[min(100%,380px)] shrink-0 flex-col overflow-hidden border-l border-border/20 bg-card/50 lg:flex lg:rounded-r-[2.5rem]">
         <div className="flex h-10 shrink-0 items-center justify-between border-b border-border/20 px-3 sm:px-4">
-          <p className="min-w-0 truncate text-sm font-medium">Samrawit-Gebremaryam-Resume.pdf</p>
+          <p className="min-w-0 truncate text-sm font-medium">{sourceDocument.title}</p>
           <div className="flex shrink-0 items-center gap-0.5">
             <button type="button" className="rounded-full p-2 hover:bg-muted/50"><ThumbsUp className="h-3.5 w-3.5" /></button>
             <button type="button" className="rounded-full p-2 hover:bg-muted/50"><ThumbsDown className="h-3.5 w-3.5" /></button>
@@ -208,9 +245,9 @@ export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSl
         </div>
         <div className="flex-1 overflow-y-auto p-4 sm:p-5">
           <div className="overflow-hidden rounded-[1.5rem] bg-background/40 p-4 text-sm leading-relaxed ring-1 ring-border/20">
-            <div className="space-y-1">
-              {docLines.map((line, i) => (
-                <p key={i} className={cn(i === 4 || i === 5 ? "rounded-lg bg-foreground/10 px-1.5 py-0.5" : "")}>{line || " "}</p>
+            <div className="space-y-0.5">
+              {sourceDocument.lines.map((line, i) => (
+                <SourceDocLine key={i} line={line} />
               ))}
             </div>
           </div>
@@ -227,14 +264,14 @@ export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSl
           />
           <div className="fixed inset-y-0 right-0 z-50 flex w-[min(100vw,24rem)] flex-col border-l border-border/20 bg-card lg:hidden">
             <div className="flex h-10 shrink-0 items-center justify-between border-b border-border/20 px-3 sm:px-4">
-              <p className="min-w-0 truncate text-sm font-medium">Samrawit-Gebremaryam-Resume.pdf</p>
+              <p className="min-w-0 truncate text-sm font-medium">{sourceDocument.title}</p>
               <button type="button" onClick={() => setShowDoc(false)} className="rounded-full p-2 hover:bg-muted/50"><X className="h-3.5 w-3.5" /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-4 sm:p-5">
               <div className="overflow-hidden rounded-[1.5rem] bg-background/40 p-4 text-sm leading-relaxed ring-1 ring-border/20">
-                <div className="space-y-1">
-                  {docLines.map((line, i) => (
-                    <p key={i} className={cn(i === 4 || i === 5 ? "rounded-lg bg-foreground/10 px-1.5 py-0.5" : "")}>{line || " "}</p>
+                <div className="space-y-0.5">
+                  {sourceDocument.lines.map((line, i) => (
+                    <SourceDocLine key={i} line={line} />
                   ))}
                 </div>
               </div>

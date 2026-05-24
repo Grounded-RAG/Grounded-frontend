@@ -7,10 +7,10 @@ import { governancePolicies, auditLog } from "@/lib/mock-data";
 import { formatDate } from "@/lib/utils";
 
 const categoryColors: Record<string, string> = {
-  Data: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  Retrieval: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  Execution: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
-  Security: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  Data: "bg-muted text-muted-foreground",
+  Retrieval: "bg-muted text-muted-foreground",
+  Execution: "bg-foreground/5 text-foreground",
+  Security: "bg-foreground/5 text-foreground",
 };
 
 export function GovernanceScreen({ workspaceSlug }: { workspaceSlug?: string }) {

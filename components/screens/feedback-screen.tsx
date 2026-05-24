@@ -34,12 +34,12 @@ export function FeedbackScreen({ workspaceSlug }: { workspaceSlug?: string }) {
           <span className="text-[12px] text-muted-foreground">{total} total</span>
         </div>
         <div className="flex h-3 rounded-full overflow-hidden gap-0.5">
-          {pos > 0 && <div className="bg-emerald-500/70 rounded-full" style={{ width: `${(pos / total) * 100}%` }} />}
+          {pos > 0 && <div className="rounded-full bg-foreground/70" style={{ width: `${(pos / total) * 100}%` }} />}
           {neu > 0 && <div className="bg-foreground/20 rounded-full" style={{ width: `${(neu / total) * 100}%` }} />}
-          {neg > 0 && <div className="bg-red-500/60 rounded-full" style={{ width: `${(neg / total) * 100}%` }} />}
+          {neg > 0 && <div className="rounded-full bg-foreground/35" style={{ width: `${(neg / total) * 100}%` }} />}
         </div>
         <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-3">
-          {[{ l: "Positive", c: pos, cl: "bg-emerald-500/70" }, { l: "Neutral", c: neu, cl: "bg-foreground/20" }, { l: "Negative", c: neg, cl: "bg-red-500/60" }].map((i) => (
+          {[{ l: "Positive", c: pos, cl: "bg-foreground/70" }, { l: "Neutral", c: neu, cl: "bg-foreground/25" }, { l: "Negative", c: neg, cl: "bg-foreground/40" }].map((i) => (
             <div key={i.l} className="flex items-center gap-2"><div className={cn("h-2.5 w-2.5 rounded-full", i.cl)} /><span className="text-[12px] text-muted-foreground">{i.l} ({i.c})</span></div>
           ))}
         </div>
@@ -60,7 +60,7 @@ export function FeedbackScreen({ workspaceSlug }: { workspaceSlug?: string }) {
                 <button key={entry.feedback_id} onClick={() => setSelectedId(entry.feedback_id)} className={cn("w-full rounded-xl border p-3 text-left transition-all", entry.feedback_id === selectedId ? "border-foreground/10 bg-foreground/5" : "border-border/10 bg-secondary/5 hover:bg-secondary/15")}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <RI className={cn("h-4 w-4 shrink-0", entry.rating === "positive" ? "text-emerald-500" : entry.rating === "negative" ? "text-red-500" : "text-muted-foreground")} />
+                      <RI className={cn("h-4 w-4 shrink-0", entry.rating === "positive" ? "text-foreground" : entry.rating === "negative" ? "text-muted-foreground" : "text-muted-foreground/70")} />
                       <p className="text-[13px] font-medium text-foreground line-clamp-1">{ag?.name ?? "Unknown"}</p>
                     </div>
                     <Badge tone={statusTones[entry.status]} size="sm" className="text-[9px] shrink-0">{entry.status}</Badge>

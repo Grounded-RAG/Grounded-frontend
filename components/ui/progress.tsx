@@ -14,9 +14,9 @@ export function ProgressBar({
   const percent = Math.min(100, Math.round((value / max) * 100));
   const toneColor = {
     accent: "bg-foreground",
-    success: "bg-emerald-500",
-    warn: "bg-amber-500",
-    danger: "bg-red-500",
+    success: "bg-foreground/80",
+    warn: "bg-muted-foreground",
+    danger: "bg-foreground/50",
   }[tone];
 
   return (
@@ -44,10 +44,10 @@ export function ConfidenceMeter({
   const offset = circumference - (percent / 100) * circumference;
   const color =
     percent >= 75
-      ? "stroke-emerald-500 dark:stroke-emerald-400"
+      ? "stroke-foreground"
       : percent >= 50
-        ? "stroke-amber-500 dark:stroke-amber-400"
-        : "stroke-red-500 dark:stroke-red-400";
+        ? "stroke-muted-foreground"
+        : "stroke-foreground/40";
 
   return (
     <div className={cn("relative inline-flex items-center justify-center", className)}>

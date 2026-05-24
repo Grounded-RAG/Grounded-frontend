@@ -234,7 +234,7 @@ export function AppShell({
               href="/login"
               onClick={() => setMobileOpen(false)}
               title="Log out"
-              className="group relative rounded-lg p-2 text-red-500 transition-colors hover:bg-red-500/15 dark:text-red-400"
+              className="group relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <LogOut className="h-[17px] w-[17px]" />
               <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-border bg-card px-2 py-1 text-xs font-medium text-foreground opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
@@ -246,7 +246,7 @@ export function AppShell({
           <Link
             href="/login"
             onClick={() => setMobileOpen(false)}
-            className="flex h-9 w-full items-center gap-3 rounded-lg px-3 text-[13px] font-medium text-red-500 transition-colors hover:bg-red-500/15 dark:text-red-400"
+            className="flex h-9 w-full items-center gap-3 rounded-lg px-3 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <LogOut className="h-[17px] w-[17px] shrink-0" />
             <span>Log out</span>
@@ -275,7 +275,7 @@ export function AppShell({
 
       <aside
         className={cn(
-          "fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-sidebar-border bg-white text-sidebar-foreground transition-all duration-300 dark:bg-[hsl(var(--sidebar-background))]",
+          "fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-300",
           "w-64",
           sidebarCollapsed && "md:w-16",
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
@@ -286,7 +286,7 @@ export function AppShell({
 
       <header
         className={cn(
-          "fixed top-0 right-0 z-30 flex h-14 items-center gap-2 border-b border-sidebar-border bg-white px-4 transition-all duration-300 dark:bg-background md:gap-2.5 md:px-5",
+          "fixed top-0 right-0 z-30 flex h-14 items-center gap-2 border-b border-sidebar-border bg-background px-4 transition-all duration-300 md:gap-2.5 md:px-5",
           "left-0",
           sidebarCollapsed ? "md:left-16" : "md:left-64",
         )}

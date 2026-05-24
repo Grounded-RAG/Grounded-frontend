@@ -11,13 +11,13 @@ export function ApiKeysScreen() {
     <div className="page-grid animate-fade-in">
       <PageHeader description="Create keys, revoke keys, and copy new raw keys exactly once after creation." action="Create key" />
 
-      <Card variant="glass" className="rounded-2xl border-amber-500/15">
+      <Card variant="glass" className="rounded-2xl border-border">
         <CardHeader title="New key created" eyebrow="Copy-once receipt" />
-        <div className="flex items-start gap-3 rounded-xl border border-amber-500/10 bg-amber-500/5 p-4">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" />
+        <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/50 p-4">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-foreground" />
           <div className="flex-1">
-            <p className="text-sm font-medium text-amber-700 dark:text-amber-300">gr_live_a1b2c3d4e5f6g7h8i9j0</p>
-            <p className="mt-1 text-xs text-amber-600/70 dark:text-amber-400/70">This key is shown once and cannot be recovered.</p>
+            <p className="text-sm font-medium text-foreground">gr_live_a1b2c3d4e5f6g7h8i9j0</p>
+            <p className="mt-1 text-xs text-muted-foreground">This key is shown once and cannot be recovered.</p>
           </div>
           <Button variant="outline" size="sm"><Copy className="h-3.5 w-3.5" /> Copy</Button>
         </div>

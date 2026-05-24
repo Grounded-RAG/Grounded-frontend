@@ -22,7 +22,7 @@ export function DatasetDetailScreen({ id, workspaceSlug }: { id: string; workspa
       <DetailPageHeader href={datasetsHref} backLabel="Back" />
 
       <div className={`${flatDetailCardClass} flex items-center gap-3 px-4 py-3`}>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
           <Database className="h-5 w-5" />
         </div>
         <h2 className="min-w-0 truncate text-lg font-bold text-foreground">{dataset.name}</h2>
@@ -83,8 +83,8 @@ export function DatasetDetailScreen({ id, workspaceSlug }: { id: string; workspa
                   </div>
                   {job.started_at && <p className="mt-1 text-xs text-muted-foreground">Started {formatDate(job.started_at)}{job.completed_at && ` · Completed ${formatDate(job.completed_at)}`}</p>}
                   {job.error_detail && (
-                    <div className="mt-2 flex items-start gap-2 rounded-xl border border-red-500/15 bg-red-500/5 p-3">
-                      <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-500 dark:text-red-400" />
+                    <div className="mt-2 flex items-start gap-2 rounded-xl border border-border bg-muted/50 p-3">
+                      <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-foreground" />
                       <div>
                         {job.error_code && <p className="text-xs font-medium text-red-600 dark:text-red-400">{job.error_code}</p>}
                         <p className="text-sm text-red-600/80 dark:text-red-300/80">{job.error_detail}</p>
@@ -117,7 +117,7 @@ export function DatasetDetailScreen({ id, workspaceSlug }: { id: string; workspa
             </div>
             <ProgressBar value={indexedCount} max={Math.max(docs.length, 1)} tone={indexedCount === docs.length && docs.length > 0 ? "success" : "warn"} className="mt-2" />
             {docs.some((d) => d.status === "failed") && (
-              <div className="mt-3 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
+              <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
                 <AlertTriangle className="h-3 w-3" /><span>Some documents failed ingestion</span>
               </div>
             )}

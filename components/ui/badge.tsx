@@ -2,9 +2,9 @@ import { cn } from "@/lib/utils";
 
 const tones = {
   neutral: "border-border/50 bg-muted/40 text-muted-foreground",
-  success: "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  warn: "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  danger: "border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400",
+  success: "border-foreground/15 bg-foreground/5 text-foreground",
+  warn: "border-border bg-muted text-muted-foreground",
+  danger: "border-foreground/20 bg-foreground/10 text-foreground",
   accent: "border-foreground/15 bg-foreground/5 text-foreground",
 };
 
@@ -39,9 +39,9 @@ export function Badge({
         <span
           className={cn(
             "h-1.5 w-1.5 rounded-full",
-            tone === "success" && "bg-emerald-500 dark:bg-emerald-400",
-            tone === "warn" && "bg-amber-500 dark:bg-amber-400",
-            tone === "danger" && "bg-red-500 dark:bg-red-400",
+            tone === "success" && "bg-foreground",
+            tone === "warn" && "bg-muted-foreground",
+            tone === "danger" && "bg-foreground/70",
             tone === "accent" && "bg-foreground",
             tone === "neutral" && "bg-muted-foreground",
           )}

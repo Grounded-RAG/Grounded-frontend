@@ -60,11 +60,11 @@ export function TrustPanel({ run }: { run: Run }) {
 
         {run.degraded_reasons.length > 0 && (
           <div>
-            <dt className="font-medium text-amber-600 dark:text-amber-400">Degraded reasons</dt>
+            <dt className="font-medium text-muted-foreground">Degraded reasons</dt>
             <dd className="mt-2 space-y-2">
               {run.degraded_reasons.map((reason) => (
                 <p
-                  className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-sm text-amber-700 dark:text-amber-300/90"
+                  className="rounded-xl border border-border bg-muted/50 p-3 text-sm text-foreground/80"
                   key={reason}
                 >
                   {reasonLabels[reason] ?? reason}

@@ -31,7 +31,7 @@ export function BillingScreen({ workspaceSlug }: { workspaceSlug?: string }) {
                 <ul className="mt-5 grid gap-2">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-[13px] text-muted-foreground">
-                      <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />{f}
+                      <Check className="h-3.5 w-3.5 shrink-0 text-foreground" />{f}
                     </li>
                   ))}
                 </ul>

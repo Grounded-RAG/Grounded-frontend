@@ -75,7 +75,7 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
 
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
         <div className="grid flex-1 lg:grid-cols-[240px_1fr]">
-          <aside className="border-b border-border/60 bg-white px-3 py-4 lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
+          <aside className="border-b border-border/60 bg-card px-3 py-4 lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
             <div className="flex gap-2 overflow-x-auto pb-1 lg:grid lg:gap-2 lg:overflow-visible lg:pb-0">
               <button
                 type="button"

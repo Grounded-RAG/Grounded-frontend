@@ -34,7 +34,7 @@ function MessageTrustReview({ run }: { run: (typeof runs)[number] }) {
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-2 rounded-full bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground transition-all hover:bg-muted"
       >
-        <span className="flex items-center gap-1.5 font-medium text-primary">
+        <span className="flex items-center gap-1.5 font-medium text-foreground">
           <CheckCircle2 className="h-3.5 w-3.5" />
           {run.confidence_score}% Confidence
         </span>
@@ -90,7 +90,7 @@ export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSl
       <DetailPageHeader href={agentsHref} backLabel="Back" className="mb-0 shrink-0" />
 
       <div className={`${flatDetailCardClass} flex shrink-0 items-center gap-3 rounded-[2rem] px-4 py-3`}>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-foreground ring-1 ring-border/40">
           <Bot className="h-5 w-5" />
         </div>
         <h2 className="min-w-0 truncate text-lg font-bold text-foreground">{agent.name}</h2>
@@ -125,7 +125,7 @@ export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSl
 
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex h-10 shrink-0 flex-wrap items-center justify-between gap-2 px-3 sm:px-4">
-          <button type="button" className="flex min-w-0 items-center gap-2 text-xs font-medium text-primary hover:underline sm:text-sm">
+          <button type="button" className="flex min-w-0 items-center gap-2 text-xs font-medium text-foreground underline-offset-4 hover:underline sm:text-sm">
             <GitBranch className="h-4 w-4 shrink-0" />
             <span className="truncate">View Completed Workflow</span>
           </button>
@@ -151,7 +151,7 @@ export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSl
                     </div>
                   ) : (
                     <div className="flex max-w-[92%] gap-3 sm:max-w-[88%]">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-primary/25">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted text-foreground ring-1 ring-border/40">
                         <Bot className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -210,7 +210,7 @@ export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSl
           <div className="overflow-hidden rounded-[1.5rem] bg-background/40 p-4 text-sm leading-relaxed ring-1 ring-border/20">
             <div className="space-y-1">
               {docLines.map((line, i) => (
-                <p key={i} className={cn(i === 4 || i === 5 ? "rounded-lg bg-amber-100/70 px-1.5 py-0.5 dark:bg-amber-500/20" : "")}>{line || " "}</p>
+                <p key={i} className={cn(i === 4 || i === 5 ? "rounded-lg bg-foreground/10 px-1.5 py-0.5" : "")}>{line || " "}</p>
               ))}
             </div>
           </div>
@@ -234,7 +234,7 @@ export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSl
               <div className="overflow-hidden rounded-[1.5rem] bg-background/40 p-4 text-sm leading-relaxed ring-1 ring-border/20">
                 <div className="space-y-1">
                   {docLines.map((line, i) => (
-                    <p key={i} className={cn(i === 4 || i === 5 ? "rounded-lg bg-amber-100/70 px-1.5 py-0.5 dark:bg-amber-500/20" : "")}>{line || " "}</p>
+                    <p key={i} className={cn(i === 4 || i === 5 ? "rounded-lg bg-foreground/10 px-1.5 py-0.5" : "")}>{line || " "}</p>
                   ))}
                 </div>
               </div>

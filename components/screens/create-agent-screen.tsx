@@ -115,7 +115,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
         <div className="flex-1 overflow-y-auto bg-background/35">
           <div className="border-b border-border/60 bg-card px-5 py-5">
             <div className="mx-auto flex max-w-sm flex-col items-center text-center">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-foreground">
                 <Bot className="h-5 w-5" />
               </div>
               <p className="text-[15px] text-muted-foreground">Choose a setup path and configure your agent.</p>
@@ -155,7 +155,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                               {option.badge}
                             </Badge>
                           ) : null}
-                          <span className={cn("flex h-4 w-4 items-center justify-center rounded-full border", selected ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card")}>
+                          <span className={cn("flex h-4 w-4 items-center justify-center rounded-full border", selected ? "border-foreground bg-foreground text-background" : "border-border bg-card")}>
                             {selected ? <Check className="h-3 w-3" /> : null}
                           </span>
                         </span>
@@ -193,7 +193,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                       onClick={() => handleTemplateChange(item.value)}
                       className="flex items-start gap-3 rounded-2xl px-4 py-2 text-left transition-colors hover:bg-secondary/40"
                     >
-                      <span className={cn("mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border", template === item.value ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card")}>
+                      <span className={cn("mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border", template === item.value ? "border-foreground bg-foreground text-background" : "border-border bg-card")}>
                         {template === item.value ? <Check className="h-3 w-3" /> : null}
                       </span>
                       <span>
@@ -286,7 +286,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                               selected ? "border-foreground/30 bg-secondary/70" : "border-border/60 bg-card hover:bg-secondary/40",
                             )}
                           >
-                            <span className={cn("flex h-4 w-4 shrink-0 items-center justify-center rounded-full border", selected ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card")}>
+                            <span className={cn("flex h-4 w-4 shrink-0 items-center justify-center rounded-full border", selected ? "border-foreground bg-foreground text-background" : "border-border bg-card")}>
                               {selected ? <Check className="h-3 w-3" /> : null}
                             </span>
                             <Database className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -362,7 +362,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
             href="https://docs.grounded.ai"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+            className="inline-flex items-center gap-1 text-sm font-medium text-foreground transition-colors hover:text-foreground/70"
           >
             Need Help?
             <ChevronRight className="h-4 w-4" />

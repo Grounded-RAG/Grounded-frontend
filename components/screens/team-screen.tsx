@@ -86,7 +86,7 @@ export function TeamScreen({ workspaceSlug }: { workspaceSlug?: string }) {
             <CardHeader title="Quick invite" />
             <div className="grid gap-3">
               <Input label="Email" type="email" placeholder="colleague@company.com" />
-              <select className="flex h-9 w-full rounded-full border border-border/80 bg-input px-4 text-[13px] text-foreground outline-none focus:ring-2 focus:ring-primary/15">
+              <select className="flex h-9 w-full rounded-full border border-border/80 bg-input px-4 text-[13px] text-foreground outline-none focus:ring-2 focus:ring-foreground/10">
                 <option value="member">Member</option>
                 <option value="viewer">Viewer</option>
                 <option value="admin">Admin</option>

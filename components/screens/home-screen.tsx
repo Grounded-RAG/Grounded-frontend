@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, ArrowUpRight, FileText, Lock, Layers, Terminal } from "lucide-react";
 import { BrandMark } from "@/components/brand";
 import { HomeHeader } from "@/components/screens/home-header";
+import { HeroProductVisual } from "@/components/screens/hero-product-visual";
 import { Button } from "@/components/ui/button";
 import { capabilities } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
@@ -55,17 +55,7 @@ export function HomeScreen() {
           </div>
 
           <div className="relative flex justify-center lg:justify-end">
-            <div className="absolute inset-0 rounded-[2.5rem] bg-foreground/[0.03] blur-[60px] scale-90 pointer-events-none sm:rounded-[3rem]" />
-            <div className="relative z-10 w-full max-w-[540px] overflow-hidden rounded-[2rem] ring-1 ring-border/30 sm:rounded-[2.5rem]">
-              <Image
-                src="/hero-product.png"
-                alt="Grounded product, document intelligence with citations"
-                width={580}
-                height={580}
-                className="h-auto w-full object-contain"
-                priority
-              />
-            </div>
+            <HeroProductVisual className="max-w-[540px]" />
           </div>
         </div>
 

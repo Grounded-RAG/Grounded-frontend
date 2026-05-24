@@ -1,22 +1,34 @@
-import { AlertTriangle, FileText, RefreshCw, UploadCloud } from "lucide-react";
+import { AlertTriangle, Database, FileText, RefreshCw, UploadCloud } from "lucide-react";
+import { DetailPageHeader } from "@/components/ui/detail-page-header";
 import { PageHeader } from "@/components/page-header";
+import { flatDetailCardClass } from "@/components/ui/card-surface";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DocumentStatusBadge } from "@/components/ui/status";
 import { ProgressBar } from "@/components/ui/progress";
 import { EmptyState } from "@/components/ui/empty-state";
 import { datasets, documents, ingestionJobs } from "@/lib/mock-data";
-import { formatBytes, formatDate } from "@/lib/utils";
+import { formatBytes, formatDate, workspaceHref } from "@/lib/utils";
 
-export function DatasetDetailScreen({ id }: { id: string }) {
+export function DatasetDetailScreen({ id, workspaceSlug }: { id: string; workspaceSlug?: string }) {
   const dataset = datasets.find((d) => d.dataset_id === id) ?? datasets[0];
   const docs = documents.filter((d) => d.dataset_id === dataset.dataset_id);
   const jobs = ingestionJobs.filter((j) => j.dataset_id === dataset.dataset_id);
   const indexedCount = docs.filter((d) => d.status === "indexed").length;
+  const datasetsHref = workspaceHref(workspaceSlug, "/datasets");
 
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="Dataset detail" title={dataset.name} description="Inspect documents, upload source material, monitor ingestion, and review dataset policy." />
+      <DetailPageHeader href={datasetsHref} backLabel="Back" />
+
+      <div className={`${flatDetailCardClass} flex items-center gap-3 px-4 py-3`}>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Database className="h-5 w-5" />
+        </div>
+        <h2 className="min-w-0 truncate text-lg font-bold text-foreground">{dataset.name}</h2>
+      </div>
+
+      <PageHeader description="Inspect documents, upload source material, monitor ingestion, and review dataset policy." />
 
       <div className="grid gap-6 xl:grid-cols-[1fr_20rem]">
         <div className="grid gap-6">
@@ -25,7 +37,7 @@ export function DatasetDetailScreen({ id }: { id: string }) {
             <div className="grid place-items-center rounded-2xl border border-dashed border-border/30 bg-secondary/8 p-10 text-center transition-colors hover:border-foreground/15 hover:bg-secondary/15">
               <UploadCloud className="h-8 w-8 text-muted-foreground/30" />
               <p className="mt-3 text-sm font-medium text-foreground">Drag files here or click to upload</p>
-              <p className="mt-1 text-xs text-muted-foreground">.txt, .pdf, .docx supported — max 50 MB</p>
+              <p className="mt-1 text-xs text-muted-foreground">.txt, .pdf, .docx supported, max 50 MB</p>
             </div>
           </Card>
 
@@ -46,7 +58,7 @@ export function DatasetDetailScreen({ id }: { id: string }) {
                     </div>
                     <DocumentStatusBadge status={doc.status} />
                     {(doc.status === "failed" || doc.status === "indexed") && (
-                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs rounded-lg">
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs rounded-2xl">
                         <RefreshCw className="h-3 w-3 mr-1" />
                         Reindex
                       </Button>

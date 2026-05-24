@@ -9,7 +9,7 @@ import { formatDate } from "@/lib/utils";
 export function ApiKeysScreen() {
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="API keys" title="Developer access" description="Create keys, revoke keys, and copy new raw keys exactly once after creation." action="Create key" />
+      <PageHeader description="Create keys, revoke keys, and copy new raw keys exactly once after creation." action="Create key" />
 
       <Card variant="glass" className="rounded-2xl border-amber-500/15">
         <CardHeader title="New key created" eyebrow="Copy-once receipt" />

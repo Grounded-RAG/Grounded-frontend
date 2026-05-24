@@ -14,9 +14,9 @@ import {
   Plus,
   Search,
   Sparkles,
-  X,
 } from "lucide-react";
 import Link from "next/link";
+import { DetailPageHeader } from "@/components/ui/detail-page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
@@ -107,27 +107,23 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
   };
 
   return (
-    <div className="animate-fade-in mx-auto flex min-h-[calc(100vh-9rem)] w-full max-w-[1040px] flex-col overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
+    <div className="page-grid animate-fade-in">
+      <DetailPageHeader href={agentsHref} backLabel="Back" />
+
+      <div className="flex w-full flex-col flat-detail-card overflow-hidden">
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
         <div className="flex-1 overflow-y-auto bg-background/35">
-          <div className="relative border-b border-border/60 bg-card px-5 py-5">
-            <Link
-              href={agentsHref}
-              className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-secondary/70 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              aria-label="Close create agent"
-            >
-              <X className="h-4 w-4" />
-            </Link>
+          <div className="border-b border-border/60 bg-card px-5 py-5">
             <div className="mx-auto flex max-w-sm flex-col items-center text-center">
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-600 dark:bg-sky-950 dark:text-sky-300">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Bot className="h-5 w-5" />
               </div>
-              <h1 className="text-[22px] font-semibold tracking-tight text-foreground">Create Agent</h1>
+              <p className="text-[15px] text-muted-foreground">Choose a setup path and configure your agent.</p>
             </div>
           </div>
 
           <div className="p-4 sm:p-6">
-            <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+            <div className="overflow-hidden flat-detail-card">
               <div className="border-b border-border/60 bg-secondary/30 px-4 py-3">
                 <h2 className="text-[14px] font-semibold text-foreground">Setup</h2>
                 <p className="mt-1 text-[13px] text-muted-foreground">Choose how you&apos;d like to build your agent.</p>
@@ -159,7 +155,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                               {option.badge}
                             </Badge>
                           ) : null}
-                          <span className={cn("flex h-4 w-4 items-center justify-center rounded-full border", selected ? "border-sky-500 bg-sky-500 text-white" : "border-border bg-card")}>
+                          <span className={cn("flex h-4 w-4 items-center justify-center rounded-full border", selected ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card")}>
                             {selected ? <Check className="h-3 w-3" /> : null}
                           </span>
                         </span>
@@ -195,9 +191,9 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                       type="button"
                       key={item.value}
                       onClick={() => handleTemplateChange(item.value)}
-                      className="flex items-start gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-secondary/40"
+                      className="flex items-start gap-3 rounded-2xl px-4 py-2 text-left transition-colors hover:bg-secondary/40"
                     >
-                      <span className={cn("mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border", template === item.value ? "border-sky-500 bg-sky-500 text-white" : "border-border bg-card")}>
+                      <span className={cn("mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border", template === item.value ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card")}>
                         {template === item.value ? <Check className="h-3 w-3" /> : null}
                       </span>
                       <span>
@@ -217,7 +213,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
 
             <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_320px]">
               <div className="grid gap-5">
-                <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+                <div className="overflow-hidden flat-detail-card">
                   <div className="border-b border-border/60 bg-secondary/30 px-4 py-3">
                     <h2 className="text-[15px] font-semibold text-foreground">Agent Composer</h2>
                   </div>
@@ -233,7 +229,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                               type="button"
                               onClick={() => setDefaultMode(capability.mode)}
                               className={cn(
-                                "h-11 px-2 text-[12px] font-semibold capitalize transition-colors",
+                                "h-9 px-2 text-[12px] font-semibold capitalize transition-colors",
                                 defaultMode === capability.mode ? "bg-foreground text-background" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
                               )}
                             >
@@ -251,7 +247,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                           type="button"
                           onClick={() => setGroundingPolicy(policy.value)}
                           className={cn(
-                            "h-10 text-[12px] font-semibold transition-colors",
+                            "h-9 text-[12px] font-semibold transition-colors",
                             groundingPolicy === policy.value ? "bg-foreground text-background" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
                           )}
                         >
@@ -262,7 +258,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+                <div className="overflow-hidden flat-detail-card">
                   <div className="border-b border-border/60 bg-secondary/30 px-4 py-3">
                     <h2 className="text-[15px] font-semibold text-foreground">Knowledge Sources</h2>
                   </div>
@@ -290,7 +286,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                               selected ? "border-foreground/30 bg-secondary/70" : "border-border/60 bg-card hover:bg-secondary/40",
                             )}
                           >
-                            <span className={cn("flex h-4 w-4 shrink-0 items-center justify-center rounded-full border", selected ? "border-sky-500 bg-sky-500 text-white" : "border-border bg-card")}>
+                            <span className={cn("flex h-4 w-4 shrink-0 items-center justify-center rounded-full border", selected ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card")}>
                               {selected ? <Check className="h-3 w-3" /> : null}
                             </span>
                             <Database className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -317,7 +313,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
               </div>
 
               <aside className="grid content-start gap-5">
-                <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
+                <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-none">
                   <h2 className="text-[15px] font-semibold text-foreground">Summary</h2>
                   <dl className="mt-3 grid gap-2.5 text-[13px]">
                     <div className="flex justify-between gap-4 border-b border-border/60 pb-2">
@@ -339,7 +335,7 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
                   </dl>
                 </div>
 
-                <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
+                <div className="rounded-2xl border border-border/60 bg-card p-4 shadow-none">
                   <h2 className="text-[15px] font-semibold text-foreground">Readiness</h2>
                   <div className="mt-3 grid gap-2">
                     {[
@@ -361,27 +357,28 @@ export function CreateAgentScreen({ workspaceSlug }: { workspaceSlug?: string })
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-border/60 bg-card px-5 py-4">
+        <div className="flex flex-col gap-3 border-t border-border/60 bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <Link
             href="https://docs.grounded.ai"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[14px] font-medium text-sky-600 transition-colors hover:text-sky-700 dark:text-sky-300"
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
           >
             Need Help?
             <ChevronRight className="h-4 w-4" />
           </Link>
-          <div className="flex items-center gap-3">
-            <Button type="submit" variant="secondary" disabled={!ready} className="rounded-lg">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <Button type="submit" variant="soft" disabled={!ready} className="w-full sm:w-auto">
               Create & Customize
             </Button>
-            <Button type="submit" disabled={!ready} className="rounded-lg">
+            <Button type="submit" disabled={!ready} className="w-full sm:w-auto">
               Start Chatting
               <Boxes className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </form>
+      </div>
     </div>
   );
 }

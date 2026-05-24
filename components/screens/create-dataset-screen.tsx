@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
+import { DetailPageHeader } from "@/components/ui/detail-page-header";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { cn, workspaceHref } from "@/lib/utils";
@@ -67,27 +68,20 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
   };
 
   return (
-    <div className="animate-fade-in mx-auto flex min-h-[calc(100vh-9rem)] w-full max-w-[1040px] flex-col overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
-      <div className="flex h-16 items-center justify-between border-b border-border/60 px-5 sm:px-6">
-        <h1 className="text-[22px] font-semibold tracking-tight text-foreground">Create Dataset</h1>
-        <Link
-          href={datasetsHref}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary/70 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          aria-label="Close create dataset"
-        >
-          <X className="h-4 w-4" />
-        </Link>
-      </div>
+    <div className="page-grid animate-fade-in">
+      <DetailPageHeader href={datasetsHref} backLabel="Back" />
+
+      <div className="flex w-full flex-col flat-detail-card overflow-hidden">
 
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
         <div className="grid flex-1 lg:grid-cols-[240px_1fr]">
-          <aside className="border-b border-border/60 bg-card px-4 py-5 lg:border-b-0 lg:border-r">
-            <div className="grid gap-2">
+          <aside className="border-b border-border/60 bg-white px-3 py-4 lg:border-b-0 lg:border-r lg:px-4 lg:py-5">
+            <div className="flex gap-2 overflow-x-auto pb-1 lg:grid lg:gap-2 lg:overflow-visible lg:pb-0">
               <button
                 type="button"
                 onClick={() => setStep(1)}
                 className={cn(
-                  "flex h-11 items-center justify-between rounded-lg px-3 text-left text-[14px] font-semibold transition-colors",
+                  "flex h-9 shrink-0 items-center justify-between rounded-2xl px-3.5 text-left text-[13px] font-semibold transition-colors lg:w-full",
                   activeSection === "general" ? "bg-secondary/70 text-foreground" : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground",
                 )}
               >
@@ -97,12 +91,12 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
                 </span>
                 {activeSection === "general" ? <span className="h-5 w-px bg-foreground" /> : null}
               </button>
-              <div className="px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/55">Advanced</div>
+              <div className="hidden px-3 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/55 lg:block">Advanced</div>
               <button
                 type="button"
                 onClick={() => setStep(2)}
                 className={cn(
-                  "flex h-11 items-center gap-3 rounded-lg px-3 text-left text-[14px] font-semibold transition-colors",
+                  "flex h-9 shrink-0 items-center gap-2.5 rounded-2xl px-3.5 text-left text-[13px] font-semibold transition-colors lg:w-full",
                   activeSection === "advanced" ? "bg-secondary/70 text-foreground" : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground",
                 )}
               >
@@ -112,7 +106,7 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="flex h-11 items-center gap-3 rounded-lg px-3 text-left text-[14px] font-semibold text-muted-foreground transition-colors hover:bg-secondary/40 hover:text-foreground"
+                className="flex h-9 shrink-0 items-center gap-2.5 rounded-2xl px-3.5 text-left text-[13px] font-semibold text-muted-foreground transition-colors hover:bg-secondary/40 hover:text-foreground lg:w-full"
               >
                 <Settings2 className="h-4 w-4" />
                 Chunking
@@ -122,7 +116,7 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
 
           <section className="min-w-0 bg-background/35 p-4 sm:p-6">
             <div className="grid gap-5">
-              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+              <div className="overflow-hidden flat-detail-card">
                 <div className="border-b border-border/60 bg-secondary/30 px-4 py-3">
                   <h2 className="text-[17px] font-semibold text-foreground">General</h2>
                 </div>
@@ -151,7 +145,7 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
                             type="button"
                             onClick={() => setFreshness(option.value)}
                             className={cn(
-                              "min-h-11 border-r border-border/60 px-2 text-center text-[12px] font-semibold last:border-r-0",
+                              "min-h-9 border-r border-border/60 px-2 text-center text-[12px] font-semibold last:border-r-0",
                               freshness === option.value ? "bg-foreground text-background" : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
                             )}
                           >
@@ -170,7 +164,7 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
                 </div>
               </div>
 
-              <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+              <div className="overflow-hidden flat-detail-card">
                 <div className="border-b border-border/60 bg-secondary/30 px-4 py-3">
                   <h2 className="text-[17px] font-semibold text-foreground">How would you like to add content?</h2>
                 </div>
@@ -204,7 +198,7 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
               </div>
 
               {uploadedFiles.length > 0 ? (
-                <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+                <div className="overflow-hidden flat-detail-card">
                   <div className="border-b border-border/60 bg-secondary/30 px-4 py-3">
                     <h2 className="text-[17px] font-semibold text-foreground">Selected files</h2>
                   </div>
@@ -234,7 +228,7 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
                 </div>
               ) : null}
 
-              <div className="grid gap-5 rounded-2xl border border-border/60 bg-card p-4 shadow-sm sm:p-5">
+              <div className="grid gap-5 rounded-2xl border border-border/60 bg-card p-4 shadow-none sm:p-5">
                 <div className="grid gap-4 md:grid-cols-2">
                   <OptionGroup label="Sensitivity" options={sensitivityOptions} value={sensitivity} onChange={setSensitivity} />
                   <OptionGroup label="Execution tier" options={tierOptions} value={executionTier} onChange={setExecutionTier} />
@@ -248,25 +242,26 @@ export function CreateDatasetScreen({ workspaceSlug }: { workspaceSlug?: string 
           </section>
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-border/60 bg-card px-5 py-4">
+        <div className="flex flex-col-reverse gap-3 border-t border-border/60 bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <Link href={datasetsHref}>
-            <Button type="button" variant="secondary" className="rounded-lg">
+            <Button type="button" variant="secondary" className="rounded-2xl">
               Cancel
             </Button>
           </Link>
           {step === 1 ? (
-            <Button type="button" disabled={!ready} className="rounded-lg" onClick={() => setStep(2)}>
+            <Button type="button" disabled={!ready} className="rounded-2xl" onClick={() => setStep(2)}>
               Next
               <ChevronRight className="h-4 w-4" />
             </Button>
           ) : (
-            <Button type="submit" disabled={!ready} className="rounded-lg">
+            <Button type="submit" disabled={!ready} className="rounded-2xl">
               Create
               <Plus className="h-4 w-4" />
             </Button>
           )}
         </div>
       </form>
+      </div>
     </div>
   );
 }
@@ -330,7 +325,7 @@ function Toggle({
         <span className="block text-[12px] text-muted-foreground">{description}</span>
       </span>
       <span className={cn("relative h-6 w-11 shrink-0 rounded-full border transition-colors", checked ? "border-foreground bg-foreground" : "border-border bg-secondary")}>
-        <span className={cn("absolute top-0.5 h-[18px] w-[18px] rounded-full bg-card shadow-sm transition-transform", checked ? "translate-x-[20px]" : "translate-x-0.5")} />
+        <span className={cn("absolute top-0.5 h-[18px] w-[18px] rounded-full bg-card shadow-none transition-transform", checked ? "translate-x-[20px]" : "translate-x-0.5")} />
       </span>
     </button>
   );

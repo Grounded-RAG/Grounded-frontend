@@ -16,7 +16,6 @@ export function TrustPanel({ run }: { run: Run }) {
     <Card variant="glass">
       <CardHeader title="Trust review" eyebrow="Grounding" />
 
-      {/* Confidence meter + badges */}
       <div className="flex items-start gap-4">
         <ConfidenceMeter score={run.confidence_score} />
         <div className="flex flex-1 flex-wrap gap-1.5">
@@ -27,7 +26,6 @@ export function TrustPanel({ run }: { run: Run }) {
         </div>
       </div>
 
-      {/* Details */}
       <dl className="mt-5 grid gap-4 text-sm">
         <div>
           <dt className="font-medium text-muted-foreground">Routing reason</dt>
@@ -48,7 +46,7 @@ export function TrustPanel({ run }: { run: Run }) {
                   <span className="mr-1.5 text-muted-foreground">❝</span>
                   {citation.quote}
                   <span className="ml-1 text-[10px] text-muted-foreground">
-                    — chunk {citation.chunk_index}
+                    chunk {citation.chunk_index}
                   </span>
                 </blockquote>
               ))

@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, ArrowUpRight, FileText, Lock, Layers, Terminal } from "lucide-react";
 import { BrandMark } from "@/components/brand";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { HomeHeader } from "@/components/screens/home-header";
 import { Button } from "@/components/ui/button";
 import { capabilities } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
@@ -20,32 +20,12 @@ const builtForItems = [
 
 export function HomeScreen() {
   return (
-    <main className="min-h-screen bg-background transition-colors duration-500 relative overflow-hidden">
-      {/* ─── Nav ─── */}
-      <header className="relative z-50 mx-auto w-full max-w-6xl px-6 pt-8">
-        <div className="flex items-center justify-between">
-          <BrandMark />
-          <nav className="hidden items-center gap-8 text-[14px] text-muted-foreground md:flex">
-            <Link href="#how-it-works" className="transition-colors hover:text-foreground">How it works</Link>
-            <Link href="#features" className="transition-colors hover:text-foreground">Features</Link>
-            <Link href="#modes" className="transition-colors hover:text-foreground">Execution modes</Link>
-          </nav>
-          <div className="flex items-center gap-5">
-            <ThemeToggle />
-            <Link href="/login" className="hidden sm:block text-[14px] font-medium text-muted-foreground hover:text-foreground transition-colors">
-              Sign in
-            </Link>
-            <Link href="/sign-up">
-              <Button size="sm" className="rounded-lg">Get started</Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+    <>
+      <HomeHeader />
 
-      {/* ─── Hero ─── */}
-      <section className="relative z-10 mx-auto max-w-6xl px-6 pt-24 pb-16 sm:pt-32 sm:pb-20">
+      <main className="relative min-h-screen bg-background transition-colors duration-500">
+      <section className="relative z-10 mx-auto max-w-6xl px-6 pt-8 pb-16 sm:pt-12 sm:pb-20">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-          {/* Left — copy */}
           <div className="max-w-xl">
             <p className="text-[13px] font-semibold text-muted-foreground tracking-wide uppercase mb-6">
               Document-backed intelligence
@@ -57,12 +37,12 @@ export function HomeScreen() {
             </h1>
 
             <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-xl mb-10">
-              Grounded connects your LLMs to your actual documents — every answer comes with sentence-level citations back to your source material.
+              Grounded connects your LLMs to your actual documents. Every answer comes with sentence-level citations back to your source material.
             </p>
 
             <div className="flex items-center gap-5">
               <Link href="/sign-up">
-                <Button size="lg" className="h-12 px-7 text-[15px] rounded-lg shadow-sm">
+                <Button size="lg" className="h-12 px-8 text-[15px] shadow-none">
                   Start building
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
@@ -74,35 +54,31 @@ export function HomeScreen() {
             </div>
           </div>
 
-          {/* Right — product image */}
           <div className="relative flex justify-center lg:justify-end">
-            {/* Glow behind image */}
-            <div className="absolute inset-0 bg-foreground/[0.03] rounded-[3rem] blur-[60px] scale-90 pointer-events-none" />
-            <Image
-              src="/hero-product.png"
-              alt="Grounded product — document intelligence with citations"
-              width={580}
-              height={580}
-              className="relative z-10 w-full max-w-[540px] h-auto drop-shadow-2xl rounded-2xl"
-              priority
-            />
+            <div className="absolute inset-0 rounded-[2.5rem] bg-foreground/[0.03] blur-[60px] scale-90 pointer-events-none sm:rounded-[3rem]" />
+            <div className="relative z-10 w-full max-w-[540px] overflow-hidden rounded-[2rem] ring-1 ring-border/30 sm:rounded-[2.5rem]">
+              <Image
+                src="/hero-product.png"
+                alt="Grounded product, document intelligence with citations"
+                width={580}
+                height={580}
+                className="h-auto w-full object-contain"
+                priority
+              />
+            </div>
           </div>
         </div>
 
-        {/* Accent line — subtle geometric detail */}
         <div className="absolute top-20 right-0 w-px h-48 bg-gradient-to-b from-transparent via-border/60 to-transparent hidden lg:block" />
         <div className="absolute top-44 right-16 w-32 h-px bg-gradient-to-r from-border/60 to-transparent hidden lg:block" />
       </section>
 
-      {/* ─── Social proof strip — scrolling marquee ─── */}
       <section className="relative z-10 border-y border-border/20 overflow-hidden">
         <div className="mx-auto max-w-6xl px-6 py-5 flex items-center gap-10">
           <p className="text-[13px] text-muted-foreground/60 font-medium uppercase tracking-wider shrink-0">Built for</p>
           <div className="overflow-hidden flex-1 relative">
-            {/* Fade edges */}
             <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
-            {/* Scrolling content — duplicated for seamless loop */}
             <div className="animate-marquee flex items-center gap-8 whitespace-nowrap w-max">
               {[...builtForItems, ...builtForItems].map((item, i) => (
                 <span key={`${item}-${i}`} className="flex items-center gap-3 text-[14px] font-medium text-muted-foreground/80">
@@ -115,7 +91,6 @@ export function HomeScreen() {
         </div>
       </section>
 
-      {/* ─── How it works ─── */}
       <section id="how-it-works" className="relative z-10 mx-auto max-w-6xl px-6 py-24 sm:py-32">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-start">
           <div>
@@ -133,7 +108,7 @@ export function HomeScreen() {
               {
                 step: "01",
                 title: "Upload your documents",
-                desc: "PDF, DOCX, TXT — drag them into a dataset. We index, chunk, and track provenance automatically.",
+                desc: "PDF, DOCX, TXT. Drag them into a dataset. We index, chunk, and track provenance automatically.",
               },
               {
                 step: "02",
@@ -158,7 +133,6 @@ export function HomeScreen() {
         </div>
       </section>
 
-      {/* ─── Features — staggered layout ─── */}
       <section id="features" className="relative z-10 border-t border-border/20">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <p className="text-[12px] font-semibold text-muted-foreground/60 uppercase tracking-widest mb-4">Capabilities</p>
@@ -171,7 +145,7 @@ export function HomeScreen() {
               {
                 icon: FileText,
                 title: "Sentence-level citations",
-                desc: "Every claim maps to a specific passage in your source documents. Not summaries — actual quotes with document names and chunk indices.",
+                desc: "Every claim maps to a specific passage in your source documents. Not summaries, but actual quotes with document names and chunk indices.",
               },
               {
                 icon: Lock,
@@ -199,7 +173,6 @@ export function HomeScreen() {
         </div>
       </section>
 
-      {/* ─── Modes ─── */}
       <section id="modes" className="relative z-10 border-t border-border/20">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
           <div className="grid lg:grid-cols-[1fr_1.3fr] gap-16 lg:gap-24 items-start">
@@ -236,7 +209,6 @@ export function HomeScreen() {
         </div>
       </section>
 
-      {/* ─── CTA ─── */}
       <section className="relative z-10 border-t border-border/20">
         <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32 text-center">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-4">Ready to ground your AI?</h2>
@@ -245,7 +217,7 @@ export function HomeScreen() {
           </p>
           <div className="flex items-center justify-center gap-5">
             <Link href="/sign-up">
-              <Button size="lg" className="h-12 px-7 text-[15px] rounded-lg">
+              <Button size="lg" className="h-12 px-8 text-[15px] shadow-none">
                 Start your workspace
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
@@ -257,7 +229,6 @@ export function HomeScreen() {
         </div>
       </section>
 
-      {/* ─── Footer ─── */}
       <footer className="relative z-10 border-t border-border/20">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-10">
           <BrandMark size="sm" />
@@ -265,5 +236,6 @@ export function HomeScreen() {
         </div>
       </footer>
     </main>
+    </>
   );
 }

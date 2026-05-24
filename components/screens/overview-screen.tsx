@@ -16,33 +16,25 @@ export function OverviewScreen({ workspaceSlug }: { workspaceSlug?: string }) {
   const activeAgents = wsAgents.filter((a) => a.status === "active").length;
 
   return (
-    <div className="animate-fade-in w-full max-w-[1200px] mx-auto space-y-6 sm:space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 mb-2">Overview</p>
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">{workspace.name}</h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href={workspaceHref(workspaceSlug, "/datasets")}>
-            <Button variant="outline" className="h-9 rounded-full bg-foreground/[0.02] border-border/30 hover:bg-foreground/[0.05] shadow-sm text-xs">
-              <Database className="mr-2 h-3.5 w-3.5" />
-              Add Data
-            </Button>
-          </Link>
-          <Link href={workspaceHref(workspaceSlug, "/agents")}>
-            <Button className="h-9 rounded-full shadow-sm text-xs">
-              <Bot className="mr-2 h-3.5 w-3.5" />
-              New Agent
-            </Button>
-          </Link>
-        </div>
+    <div className="animate-fade-in w-full space-y-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
+        <Link href={workspaceHref(workspaceSlug, "/datasets")} className="w-full sm:w-auto">
+          <Button variant="outline" className="h-9 w-full shadow-none text-xs sm:w-auto">
+            <Database className="mr-2 h-3.5 w-3.5" />
+            Add Data
+          </Button>
+        </Link>
+        <Link href={workspaceHref(workspaceSlug, "/agents")} className="w-full sm:w-auto">
+          <Button className="h-9 w-full shadow-none text-xs sm:w-auto">
+            <Bot className="mr-2 h-3.5 w-3.5" />
+            New Agent
+          </Button>
+        </Link>
       </div>
 
-      {/* ─── Bento Grid ─── */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
         
-        {/* Readiness Hero Box (Spans 2 cols) */}
-        <Card variant="glass" className="md:col-span-2 lg:col-span-2 rounded-[2rem] p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden group">
+        <Card variant="glass" className="md:col-span-2 lg:col-span-2 rounded-[2rem] p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden group">
           <div className="absolute right-0 top-0 w-64 h-64 bg-foreground/[0.02] rounded-full blur-[60px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -79,12 +71,11 @@ export function OverviewScreen({ workspaceSlug }: { workspaceSlug?: string }) {
           </div>
         </Card>
 
-        {/* Small Stat Boxes */}
         {[
           { label: "Indexed Documents", value: `${indexedDocs}`, sub: `of ${totalDocs} total`, icon: Database },
           { label: "Active Agents", value: activeAgents, sub: "ready to run", icon: Bot },
         ].map((stat) => (
-          <Card key={stat.label} variant="glass" className="rounded-[2rem] p-6 flex flex-col justify-between group hover:-translate-y-0.5 transition-transform duration-300">
+          <Card key={stat.label} variant="glass" className="rounded-[2rem] p-5 flex flex-col justify-between group hover:-translate-y-0.5 transition-transform duration-300">
             <div className="flex items-start justify-between mb-8">
               <div className="h-10 w-10 rounded-2xl bg-foreground/[0.03] flex items-center justify-center border border-border/30">
                 <stat.icon className="h-4 w-4 text-foreground/70 transition-transform duration-300 group-hover:scale-110 group-hover:text-foreground" />
@@ -98,8 +89,7 @@ export function OverviewScreen({ workspaceSlug }: { workspaceSlug?: string }) {
           </Card>
         ))}
 
-        {/* Mode Availability (Spans 2 cols on MD) */}
-        <Card variant="glass" className="md:col-span-3 lg:col-span-2 rounded-[2rem] p-6 sm:p-8 flex flex-col justify-between">
+        <Card variant="glass" className="md:col-span-3 lg:col-span-2 rounded-[2rem] p-5 sm:p-6 flex flex-col justify-between">
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-1">
               <Zap className="h-4 w-4 text-muted-foreground" />
@@ -122,8 +112,7 @@ export function OverviewScreen({ workspaceSlug }: { workspaceSlug?: string }) {
           </div>
         </Card>
 
-        {/* Recent Activity (Spans 2 cols) */}
-        <Card variant="glass" className="md:col-span-3 lg:col-span-2 rounded-[2rem] p-6 sm:p-8">
+        <Card variant="glass" className="md:col-span-3 lg:col-span-2 rounded-[2rem] p-5 sm:p-6">
            <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -138,7 +127,7 @@ export function OverviewScreen({ workspaceSlug }: { workspaceSlug?: string }) {
                const agent = agents.find((a) => a.agent_id === run.agent_id);
                return (
                 <Link href={workspaceHref(workspaceSlug, "/runs")} key={run.run_id}>
-                  <div className="flex items-center justify-between rounded-2xl border border-transparent p-2.5 hover:bg-foreground/[0.03] hover:border-border/20 transition-all group">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-transparent p-2.5 hover:bg-foreground/[0.03] hover:border-border/20 transition-all group">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-full bg-foreground/[0.05] border border-border/20 flex items-center justify-center">
                         <Activity className="h-3.5 w-3.5 text-foreground/60" />

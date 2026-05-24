@@ -1,13 +1,16 @@
 import { cn } from "@/lib/utils";
+import { flatCardSurfaceClass, flatDetailCardClass } from "@/components/ui/card-surface";
 import type { HTMLAttributes } from "react";
 
-type Variant = "default" | "glass" | "elevated" | "subtle";
+type Variant = "default" | "flat" | "detail" | "subtle" | "glass" | "elevated";
 
 const variantStyles: Record<Variant, string> = {
-  default: "glass-card",
-  glass: "glass-card",
-  elevated: "elevated-panel",
-  subtle: "border-transparent bg-secondary/30",
+  default: flatCardSurfaceClass,
+  flat: flatCardSurfaceClass,
+  glass: flatCardSurfaceClass,
+  elevated: flatDetailCardClass,
+  detail: flatDetailCardClass,
+  subtle: "rounded-2xl border-0 bg-muted/30 shadow-none",
 };
 
 export function Card({
@@ -23,10 +26,9 @@ export function Card({
   return (
     <section
       className={cn(
-        "rounded-2xl p-5",
+        "p-5 md:p-6",
         variantStyles[variant],
-        interactive &&
-          "cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-elevated",
+        interactive && "cursor-pointer transition-all duration-200 hover:bg-muted/20",
         className,
       )}
       {...props}

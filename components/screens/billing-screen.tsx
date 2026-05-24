@@ -16,10 +16,9 @@ const plans = [
 export function BillingScreen({ workspaceSlug }: { workspaceSlug?: string }) {
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="Analytics" title="Billing" description="Manage your plan, payment methods, and invoice history." />
+      <PageHeader description="Manage your plan, payment methods, and invoice history." />
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="grid gap-6">
-          {/* Plan comparison */}
           <div className="grid sm:grid-cols-3 gap-4">
             {plans.map((plan) => (
               <Card key={plan.name} variant="glass" className={cn("rounded-2xl relative", plan.current && "ring-1 ring-foreground/20")}>
@@ -48,7 +47,6 @@ export function BillingScreen({ workspaceSlug }: { workspaceSlug?: string }) {
               </Card>
             ))}
           </div>
-          {/* Invoices */}
           <Card variant="glass" className="rounded-2xl">
             <CardHeader title="Invoice history" />
             <div className="grid gap-2">
@@ -68,7 +66,6 @@ export function BillingScreen({ workspaceSlug }: { workspaceSlug?: string }) {
             </div>
           </Card>
         </div>
-        {/* Payment method sidebar */}
         <div className="grid content-start gap-6">
           <Card variant="glass" className="rounded-2xl">
             <CardHeader title="Payment method" />

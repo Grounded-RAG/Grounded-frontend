@@ -16,7 +16,7 @@ export function RunsScreen() {
 
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="Runs" title="Audit and trust history" description="Search prior executions, inspect routing, review answers, and verify evidence." />
+      <PageHeader description="Search prior executions, inspect routing, review answers, and verify evidence." />
 
       {runs.length === 0 ? (
         <EmptyState icon={<Clock className="h-10 w-10" />} title="No runs yet" description="Runs appear after you ask questions through an agent." />
@@ -24,7 +24,7 @@ export function RunsScreen() {
         <div className="grid gap-6 xl:grid-cols-[20rem_1fr]">
           <Card variant="glass" className="max-h-[calc(100vh-14rem)] overflow-hidden flex flex-col rounded-2xl">
             <CardHeader title="Run list" action={
-              <div className="flex h-8 w-full items-center gap-2 rounded-full glass px-3">
+              <div className="flex h-8 w-full items-center gap-2 rounded-full bg-card px-3">
                 <Search className="h-3.5 w-3.5 text-muted-foreground/40" />
                 <input className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground/40" placeholder="Search..." />
               </div>
@@ -52,7 +52,7 @@ export function RunsScreen() {
                 <DetailRow label="Latency" value={`${selected.total_latency_ms}ms`} />
                 <DetailRow label="Provider" value={selected.generator_provider} />
                 <DetailRow label="Mode" value={selected.selected_mode ?? "auto"} />
-                <DetailRow label="Requested depth" value={selected.requested_tier ?? "—"} />
+                <DetailRow label="Requested depth" value={selected.requested_tier ?? "None"} />
                 <DetailRow label="Fallback" value={selected.provider_fallback_used ? `from ${selected.provider_fallback_from}` : "None"} />
               </div>
             </Card>

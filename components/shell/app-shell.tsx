@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,58 +9,65 @@ import {
   Bot,
   BookOpen,
   ChevronLeft,
+  ChevronRight,
   CreditCard,
   Database,
+  ExternalLink,
   KeyRound,
   LayoutDashboard,
   LogOut,
   Menu,
   MessageSquareText,
+  Plus,
   Settings,
   ShieldCheck,
   Users,
   X,
 } from "lucide-react";
 import { BrandMark } from "@/components/brand";
+import { ProfileMenu } from "@/components/shell/profile-menu";
+import { resolveNavbarTitle } from "@/components/shell/resolve-navbar-title";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { organization, workspaces } from "@/lib/mock-data";
+import { poppins } from "@/lib/fonts";
+import { organization } from "@/lib/mock-data";
 import { cn, workspaceHref } from "@/lib/utils";
 
 const navGroups = [
   {
-    label: "Workspace",
+    label: null,
     items: [
       { label: "Overview", icon: LayoutDashboard, path: "/overview" },
-      { label: "Datasets", icon: Database, path: "/datasets" },
-      { label: "Agents", icon: Bot, path: "/agents" },
-      { label: "Runs", icon: Activity, path: "/runs" },
+      { label: "Agents", icon: Bot, path: "/agents", showPlus: true },
     ],
   },
   {
-    label: "Analytics",
+    label: "Knowledge",
+    items: [{ label: "Datasets", icon: Database, path: "/datasets" }],
+  },
+  {
+    label: "Insights",
+    items: [
+      { label: "Runs", icon: Activity, path: "/runs" },
+      { label: "Feedback", icon: MessageSquareText, path: "/feedback" },
+    ],
+  },
+  {
+    label: "Admin",
     items: [
       { label: "Usage", icon: BarChart3, path: "/usage" },
-      { label: "Feedback", icon: MessageSquareText, path: "/feedback" },
       { label: "Billing", icon: CreditCard, path: "/billing" },
-    ],
-  },
-  {
-    label: "Organization",
-    items: [
       { label: "Team", icon: Users, path: "/team" },
       { label: "Governance", icon: ShieldCheck, path: "/governance" },
-    ],
-  },
-  {
-    label: "System",
-    items: [
       { label: "Settings", icon: Settings, path: "/settings" },
       { label: "API Keys", icon: KeyRound, path: "/api-keys" },
-      { label: "Docs", icon: BookOpen, path: "https://docs.grounded.ai", external: true },
     ],
   },
+];
+
+const footerLinks = [
+  { label: "Documentation", icon: BookOpen, path: "https://docs.grounded.ai" },
+  { label: "Contact Support", icon: MessageSquareText, path: "mailto:support@grounded.ai" },
 ];
 
 export function AppShell({
@@ -72,167 +78,248 @@ export function AppShell({
   workspaceSlug?: string;
 }) {
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const workspace = useMemo(
-    () => workspaces.find((w) => w.slug === workspaceSlug) ?? workspaces[0],
-    [workspaceSlug],
-  );
-  const isChat = /\/agents\/[^/]+$/.test(pathname) && !pathname.endsWith('/agents/new');
-  const expanded = isChat ? false : sidebarOpen;
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isChat = /\/agents\/[^/]+$/.test(pathname) && !pathname.endsWith("/agents/new");
+  const navTitle = useMemo(() => resolveNavbarTitle(pathname, workspaceSlug), [pathname, workspaceSlug]);
 
-  const sidebarContent = (
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
+  const sidebarContent = (collapsed: boolean) => (
     <>
-      <div className={cn("flex items-center transition-all duration-300 pt-6 pb-4", expanded ? "px-6" : "px-0 justify-center")}>
-        {expanded ? (
-          <BrandMark size="sm" />
-        ) : (
-          <Link
-            href="/"
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border/30 bg-card shadow-sm transition-transform duration-200 hover:scale-105"
-            aria-label="Grounded home"
-          >
-            <Image
-              src="/Grounded_light_logo.jpg"
-              alt="Grounded"
-              width={28}
-              height={28}
-              className="h-7 w-7 rounded-lg object-cover"
-              priority
-            />
-          </Link>
+      <div
+        className={cn(
+          "flex h-14 shrink-0 items-center border-b border-sidebar-border",
+          collapsed ? "justify-between gap-0.5 px-1.5" : "justify-between gap-2 px-4",
         )}
+      >
+          <BrandMark size="sm" compact={collapsed} />
+          <button
+            type="button"
+            onClick={() => setSidebarCollapsed((value) => !value)}
+            className={cn(
+              "hidden shrink-0 rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground md:inline-flex",
+              collapsed ? "p-1" : "rounded-lg p-1.5",
+            )}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6 scrollbar-none">
+      <nav
+        className={cn(
+          "flex-1 overflow-y-auto scrollbar-none",
+          collapsed ? "space-y-1.5 px-2 py-2 sidebar-collapsed" : "space-y-5 px-3 py-3",
+        )}
+      >
         {navGroups.map((group) => (
-          <div key={group.label}>
-            {expanded && (
-              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+          <div key={group.label ?? "top"}>
+            {group.label && !collapsed ? (
+              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
                 {group.label}
               </p>
-            )}
-            <div className="space-y-1">
+            ) : null}
+            <div className="space-y-0.5">
               {group.items.map((item) => {
                 const Icon = item.icon;
-                const isExternal = "external" in item && item.external;
-                const href = isExternal ? (item as any).path : workspaceHref(workspaceSlug, item.path);
-                const active = !isExternal && pathname.startsWith(href);
+                const href = workspaceHref(workspaceSlug, item.path);
+                const active = pathname.startsWith(href);
+                const showPlus = !collapsed && "showPlus" in item && item.showPlus;
+
+                if (collapsed) {
+                  return (
+                    <Link
+                      key={item.label}
+                      href={href}
+                      onClick={() => setMobileOpen(false)}
+                      title={item.label}
+                      className={cn(
+                        "group/nav flex h-9 items-center justify-center rounded-lg transition-all duration-200",
+                        active ? "sidebar-nav-active" : "sidebar-nav-idle text-muted-foreground",
+                      )}
+                    >
+                      <Icon className="h-[17px] w-[17px] shrink-0" />
+                    </Link>
+                  );
+                }
+
                 return (
-                  <Link
-                    href={href}
+                  <div
                     key={item.label}
-                    target={isExternal ? "_blank" : undefined}
-                    rel={isExternal ? "noopener noreferrer" : undefined}
-                    onClick={() => setMobileOpen(false)}
                     className={cn(
-                      "group relative flex items-center gap-3 rounded-xl transition-all duration-200",
-                      expanded ? "h-10 px-3" : "h-10 w-10 justify-center mx-auto",
-                      active
-                        ? "bg-foreground/[0.04] text-foreground font-semibold shadow-sm"
-                        : "text-muted-foreground/80 hover:bg-foreground/[0.03] hover:text-foreground",
+                      "group flex h-9 items-center gap-1 rounded-lg px-2.5 text-[13px] transition-all duration-200",
+                      active ? "sidebar-nav-active" : "sidebar-nav-idle text-muted-foreground",
                     )}
                   >
-                    {active && expanded && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-1 rounded-r-full bg-foreground shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
-                    )}
-                    <Icon className={cn("shrink-0 transition-transform duration-200", expanded ? "h-[18px] w-[18px]" : "h-5 w-5", active && !expanded && "text-foreground")} />
-                    {expanded && (
-                      <span className="flex-1 truncate text-[13px]">{item.label}</span>
-                    )}
-                    {!expanded && active && (
-                       <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-[3px] rounded-r-full bg-foreground shadow-[0_0_8px_rgba(0,0,0,0.5)] dark:shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
-                    )}
-                  </Link>
+                    <Link
+                      href={href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex min-w-0 flex-1 items-center gap-3"
+                    >
+                      <Icon className="h-[17px] w-[17px] shrink-0" />
+                      <span className="truncate">{item.label}</span>
+                    </Link>
+                    {showPlus ? (
+                      <Link
+                        href={workspaceHref(workspaceSlug, "/agents/new")}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg opacity-0 transition-all hover:bg-muted group-hover:opacity-100"
+                        aria-label="Create agent"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                      </Link>
+                    ) : null}
+                  </div>
                 );
               })}
             </div>
           </div>
         ))}
+
+        <div
+          className={cn(
+            "space-y-0.5 border-t border-sidebar-border/60",
+            collapsed ? "pt-2" : "pt-4",
+          )}
+        >
+          {footerLinks.map((item) => {
+            const InIcon = item.icon;
+            return (
+              <Link
+                href={item.path}
+                key={item.label}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileOpen(false)}
+                title={item.label}
+                className={cn(
+                  "sidebar-nav-idle flex h-9 items-center rounded-lg text-[13px] text-muted-foreground transition-colors",
+                  collapsed ? "justify-center px-0" : "gap-3 px-3",
+                )}
+              >
+                <InIcon className="h-[17px] w-[17px] shrink-0" />
+                {!collapsed ? (
+                  <>
+                    <span className="flex-1 truncate">{item.label}</span>
+                    <ExternalLink className="h-3 w-3 shrink-0 opacity-50" />
+                  </>
+                ) : null}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
-      <div className="p-3 mt-auto">
-        <button
-          className={cn("flex h-10 items-center justify-center rounded-xl text-muted-foreground/60 transition-colors hover:bg-foreground/[0.03] hover:text-foreground", expanded ? "w-full gap-2" : "w-10 mx-auto")}
-          onClick={() => setSidebarOpen((v) => !v)}
-          disabled={isChat}
-        >
-          <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", !expanded && "rotate-180")} />
-          {expanded && <span className="text-[13px] font-medium">Collapse</span>}
-        </button>
+      <div
+        className={cn(
+          "flex-shrink-0 border-t border-sidebar-border",
+          collapsed ? "p-2" : "p-3",
+        )}
+      >
+        {collapsed ? (
+          <div className="flex flex-col items-center gap-1">
+            <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              title="Log out"
+              className="group relative rounded-lg p-2 text-red-500 transition-colors hover:bg-red-500/15 dark:text-red-400"
+            >
+              <LogOut className="h-[17px] w-[17px]" />
+              <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-border bg-card px-2 py-1 text-xs font-medium text-foreground opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                Log out
+              </span>
+            </Link>
+          </div>
+        ) : (
+          <Link
+            href="/login"
+            onClick={() => setMobileOpen(false)}
+            className="flex h-9 w-full items-center gap-3 rounded-lg px-3 text-[13px] font-medium text-red-500 transition-colors hover:bg-red-500/15 dark:text-red-400"
+          >
+            <LogOut className="h-[17px] w-[17px] shrink-0" />
+            <span>Log out</span>
+          </Link>
+        )}
       </div>
     </>
   );
 
   return (
-    <div className={cn("bg-background transition-colors duration-500 flex flex-col relative overflow-x-hidden", isChat ? "h-screen overflow-hidden" : "min-h-screen")}>
-      {/* ─── Ambient Glow ─── */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute -top-[10%] -left-[5%] h-[800px] w-[800px] rounded-full bg-foreground/[0.02] blur-[120px]" />
-        <div className="absolute top-[40%] -right-[5%] h-[600px] w-[600px] rounded-full bg-foreground/[0.03] blur-[120px]" />
-      </div>
-
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md md:hidden transition-all duration-300" onClick={() => setMobileOpen(false)} />
+    <div
+      className={cn(
+        poppins.className,
+        "min-h-screen min-w-0 overflow-x-hidden bg-background",
+        isChat && "h-dvh overflow-hidden",
       )}
+    >
+      {mobileOpen ? (
+        <button
+          type="button"
+          aria-label="Close menu"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      ) : null}
 
-      {/* Sidebar — desktop (Floating) */}
       <aside
         className={cn(
-          "fixed top-4 bottom-4 left-4 z-40 hidden flex-col rounded-[2rem] border border-border/30 glass shadow-2xl shadow-black/5 dark:shadow-black/20 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] md:flex overflow-hidden",
-          expanded ? "w-60" : "w-[4.5rem]",
+          "fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-sidebar-border bg-white text-sidebar-foreground transition-all duration-300 dark:bg-[hsl(var(--sidebar-background))]",
+          "w-64",
+          sidebarCollapsed && "md:w-16",
+          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
       >
-        {sidebarContent}
+        {sidebarContent(sidebarCollapsed && !mobileOpen)}
       </aside>
 
-      {/* Sidebar — mobile */}
-      <aside
+      <header
         className={cn(
-          "fixed inset-y-4 left-4 z-50 flex w-60 flex-col rounded-[2rem] border border-border/30 glass shadow-2xl shadow-black/10 dark:shadow-black/40 transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] md:hidden overflow-hidden",
-          mobileOpen ? "translate-x-0" : "-translate-x-[120%]",
+          "fixed top-0 right-0 z-30 flex h-14 items-center gap-2 border-b border-sidebar-border bg-white px-4 transition-all duration-300 dark:bg-background md:gap-2.5 md:px-5",
+          "left-0",
+          sidebarCollapsed ? "md:left-16" : "md:left-64",
         )}
       >
-        <button className="absolute right-4 top-5 text-muted-foreground hover:text-foreground transition-colors" onClick={() => setMobileOpen(false)}>
-          <X className="h-4 w-4" />
+        <button
+          type="button"
+          className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground md:hidden"
+          onClick={() => setMobileOpen((open) => !open)}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+        >
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
-        {sidebarContent}
-      </aside>
 
-      {/* Main content */}
-      <div className={cn("relative z-10 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] flex-1 flex flex-col", expanded ? "md:pl-[17rem]" : "md:pl-[6.5rem]", isChat ? "h-screen" : "min-h-screen")}>
-        {/* ─── Top Header ─── */}
-        <div className="sticky top-0 z-30 px-4 pt-4 pb-2 shrink-0">
-          <header className="mx-auto flex h-14 max-w-7xl items-center gap-4 rounded-full glass border border-border/30 px-5 shadow-sm transition-all duration-300 hover:shadow-md">
-            <Button className="md:hidden -ml-2 rounded-full hover:bg-foreground/5" variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
-              <Menu className="h-[18px] w-[18px] text-foreground/80" />
-            </Button>
+        <h1 className="min-w-0 flex-1 truncate text-sm font-semibold tracking-tight text-foreground sm:text-[15px] md:text-base">
+          {navTitle}
+        </h1>
 
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="flex h-6 items-center rounded-md bg-foreground/[0.04] px-2.5 border border-border/20 hidden sm:flex">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">Workspace</span>
-              </div>
-              <p className="truncate text-[14px] font-semibold tracking-tight text-foreground">{workspace.name}</p>
-            </div>
+        <Badge tone="accent" size="sm" className="hidden shrink-0 text-[10px] uppercase tracking-wider sm:flex">
+          {organization.subscription_plan}
+        </Badge>
+        <ThemeToggle />
+        <ProfileMenu workspaceSlug={workspaceSlug} />
+      </header>
 
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Badge tone="accent" size="sm" className="hidden sm:flex text-[10px] uppercase tracking-wider">{organization.subscription_plan}</Badge>
-              <div className="h-4 w-px bg-border/40 hidden sm:block" />
-              <ThemeToggle />
-              <Link href="/login">
-                <button className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground/80 transition-all duration-200 hover:bg-foreground/[0.05] hover:text-foreground">
-                  <LogOut className="h-4 w-4" />
-                </button>
-              </Link>
-            </div>
-          </header>
-        </div>
-
-        <main className={cn("flex-1 flex flex-col min-h-0 mx-auto w-full", isChat ? "pb-4 px-4" : "px-4 py-8 md:px-8 md:py-10 max-w-7xl")}>
-          {children}
-        </main>
-      </div>
+      <main
+        className={cn(
+          "min-w-0 p-5 pt-[calc(var(--shell-header-height)+1.25rem)] transition-all duration-300 md:p-6 md:pt-[calc(var(--shell-header-height)+1.5rem)]",
+          sidebarCollapsed ? "md:ml-16" : "md:ml-64",
+          isChat && "flex h-dvh flex-col overflow-hidden",
+        )}
+      >
+        {children}
+      </main>
     </div>
   );
 }

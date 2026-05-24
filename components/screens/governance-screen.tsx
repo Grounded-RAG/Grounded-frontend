@@ -16,10 +16,9 @@ const categoryColors: Record<string, string> = {
 export function GovernanceScreen({ workspaceSlug }: { workspaceSlug?: string }) {
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="Platform" title="Governance" description="Configure organization-wide policies, data controls, and audit settings." />
+      <PageHeader description="Configure organization-wide policies, data controls, and audit settings." />
       <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
         <div className="grid gap-6">
-          {/* Policies */}
           <Card variant="glass" className="rounded-2xl">
             <CardHeader title="Policies" eyebrow="Organization defaults" />
             <div className="grid gap-2">
@@ -45,7 +44,6 @@ export function GovernanceScreen({ workspaceSlug }: { workspaceSlug?: string }) 
               ))}
             </div>
           </Card>
-          {/* SSO/Security */}
           <Card variant="glass" className="rounded-2xl">
             <CardHeader title="Identity & Access" eyebrow="Security" />
             <div className="grid sm:grid-cols-2 gap-3">
@@ -63,7 +61,6 @@ export function GovernanceScreen({ workspaceSlug }: { workspaceSlug?: string }) 
             </div>
           </Card>
         </div>
-        {/* Audit log sidebar */}
         <Card variant="glass" className="rounded-2xl">
           <CardHeader title="Audit log" eyebrow="Recent activity" />
           <div className="grid gap-3">

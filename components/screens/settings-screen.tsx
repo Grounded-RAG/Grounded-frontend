@@ -17,10 +17,9 @@ export function SettingsScreen({ workspaceSlug }: { workspaceSlug?: string }) {
 
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="Settings" title="Workspace settings" description="Configure workspace identity, plan, modes, and security preferences." />
+      <PageHeader description="Configure workspace identity, plan, modes, and security preferences." />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Workspace identity */}
         <Card variant="glass" className="rounded-2xl">
           <CardHeader title="Workspace identity" />
           <div className="grid gap-4">
@@ -31,7 +30,6 @@ export function SettingsScreen({ workspaceSlug }: { workspaceSlug?: string }) {
           </div>
         </Card>
 
-        {/* Plan and entitlement */}
         <Card variant="glass" className="rounded-2xl">
           <CardHeader title="Plan and entitlement" />
           <dl className="grid gap-3 text-sm">
@@ -45,7 +43,6 @@ export function SettingsScreen({ workspaceSlug }: { workspaceSlug?: string }) {
           </div>
         </Card>
 
-        {/* Mode availability */}
         <Card variant="glass" className="rounded-2xl">
           <CardHeader title="Mode availability" />
           <div className="grid gap-2">
@@ -63,7 +60,6 @@ export function SettingsScreen({ workspaceSlug }: { workspaceSlug?: string }) {
           </div>
         </Card>
 
-        {/* Security */}
         <Card variant="glass" className="rounded-2xl">
           <CardHeader title="Security" />
           <div className="grid gap-4">
@@ -98,7 +94,6 @@ export function SettingsScreen({ workspaceSlug }: { workspaceSlug?: string }) {
         </Card>
       </div>
 
-      {/* Danger zone */}
       <Card variant="glass" className="rounded-2xl border-destructive/20">
         <CardHeader title="Danger zone" />
         <div className="flex items-center justify-between">

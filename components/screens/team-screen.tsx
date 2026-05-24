@@ -15,15 +15,14 @@ export function TeamScreen({ workspaceSlug }: { workspaceSlug?: string }) {
 
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="Platform" title="Team" description="Manage members, roles, and workspace access for your organization." action="Invite member" />
+      <PageHeader description="Manage members, roles, and workspace access for your organization." action="Invite member" />
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="grid gap-6">
-          {/* Members table */}
           <Card variant="glass" className="rounded-2xl">
             <CardHeader title={`Members (${active.length})`} />
             <div className="grid gap-2">
               {active.map((m) => (
-                <div key={m.user_id} className="flex items-center justify-between rounded-xl border border-border/15 bg-secondary/8 p-4 hover:bg-secondary/15 transition-colors">
+                <div key={m.user_id} className="flex flex-col gap-3 rounded-xl border border-border/15 bg-secondary/8 p-4 transition-colors hover:bg-secondary/15 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-foreground/[0.06] flex items-center justify-center border border-border/20 text-sm font-bold text-foreground/70">
                       {m.full_name.split(" ").map((n) => n[0]).join("")}
@@ -33,7 +32,7 @@ export function TeamScreen({ workspaceSlug }: { workspaceSlug?: string }) {
                       <p className="text-xs text-muted-foreground">{m.email}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     {m.has_api_key && <Badge tone="neutral" size="sm" className="text-[9px]"><KeyRound className="h-2.5 w-2.5 mr-1" />API</Badge>}
                     <Badge tone={roleTones[m.role]} size="sm" className="capitalize">{m.role}</Badge>
                     {m.last_active_at && <span className="text-[10px] text-muted-foreground/50 hidden sm:block">{formatDate(m.last_active_at)}</span>}
@@ -42,14 +41,13 @@ export function TeamScreen({ workspaceSlug }: { workspaceSlug?: string }) {
               ))}
             </div>
           </Card>
-          {/* Pending invites */}
           {pending.length > 0 && (
             <Card variant="glass" className="rounded-2xl">
               <CardHeader title={`Pending invites (${pending.length})`} />
               <div className="grid gap-2">
                 {pending.map((m) => (
-                  <div key={m.user_id} className="flex items-center justify-between rounded-xl border border-border/15 bg-secondary/8 p-4">
-                    <div className="flex items-center gap-3">
+                  <div key={m.user_id} className="flex flex-col gap-3 rounded-xl border border-border/15 bg-secondary/8 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className="h-10 w-10 rounded-full bg-foreground/[0.03] border border-dashed border-border/40 flex items-center justify-center">
                         <Mail className="h-4 w-4 text-muted-foreground/40" />
                       </div>
@@ -58,7 +56,7 @@ export function TeamScreen({ workspaceSlug }: { workspaceSlug?: string }) {
                         <p className="text-xs text-muted-foreground">Invited {formatDate(m.invited_at)} · {m.role}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Button variant="ghost" size="sm" className="h-7 text-xs rounded-lg gap-1"><RotateCcw className="h-3 w-3" />Resend</Button>
                       <Badge tone="warn" size="sm">Pending</Badge>
                     </div>
@@ -68,7 +66,6 @@ export function TeamScreen({ workspaceSlug }: { workspaceSlug?: string }) {
             </Card>
           )}
         </div>
-        {/* Sidebar: Roles & Invite */}
         <div className="grid content-start gap-6">
           <Card variant="glass" className="rounded-2xl">
             <CardHeader title="Roles" />
@@ -89,7 +86,7 @@ export function TeamScreen({ workspaceSlug }: { workspaceSlug?: string }) {
             <CardHeader title="Quick invite" />
             <div className="grid gap-3">
               <Input label="Email" type="email" placeholder="colleague@company.com" />
-              <select className="flex h-11 w-full rounded-xl border border-border/40 bg-foreground/[0.02] px-3.5 py-2 text-sm text-foreground outline-none">
+              <select className="flex h-9 w-full rounded-full border border-border/80 bg-input px-4 text-[13px] text-foreground outline-none focus:ring-2 focus:ring-primary/15">
                 <option value="member">Member</option>
                 <option value="viewer">Viewer</option>
                 <option value="admin">Admin</option>

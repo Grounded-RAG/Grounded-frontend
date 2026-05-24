@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 
-/** Horizontal progress bar */
 export function ProgressBar({
   value,
   max = 100,
@@ -30,7 +29,6 @@ export function ProgressBar({
   );
 }
 
-/** Confidence arc / ring meter */
 export function ConfidenceMeter({
   score,
   size = 56,
@@ -79,7 +77,6 @@ export function ConfidenceMeter({
   );
 }
 
-/** Step indicator for onboarding */
 export function StepIndicator({
   steps,
   current,

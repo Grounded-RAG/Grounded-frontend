@@ -27,7 +27,7 @@ export function FeedbackScreen({ workspaceSlug }: { workspaceSlug?: string }) {
 
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="Analytics" title="Feedback" description="Review answer quality, track ratings, and improve agent performance." />
+      <PageHeader description="Review answer quality, track ratings, and improve agent performance." />
       <Card variant="glass" className="rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-medium text-foreground">Rating distribution</h3>
@@ -38,13 +38,13 @@ export function FeedbackScreen({ workspaceSlug }: { workspaceSlug?: string }) {
           {neu > 0 && <div className="bg-foreground/20 rounded-full" style={{ width: `${(neu / total) * 100}%` }} />}
           {neg > 0 && <div className="bg-red-500/60 rounded-full" style={{ width: `${(neg / total) * 100}%` }} />}
         </div>
-        <div className="flex items-center gap-6 mt-3">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-3">
           {[{ l: "Positive", c: pos, cl: "bg-emerald-500/70" }, { l: "Neutral", c: neu, cl: "bg-foreground/20" }, { l: "Negative", c: neg, cl: "bg-red-500/60" }].map((i) => (
             <div key={i.l} className="flex items-center gap-2"><div className={cn("h-2.5 w-2.5 rounded-full", i.cl)} /><span className="text-[12px] text-muted-foreground">{i.l} ({i.c})</span></div>
           ))}
         </div>
       </Card>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {(["all", "positive", "negative", "neutral"] as const).map((f) => (
           <button key={f} onClick={() => setFilter(f)} className={cn("rounded-lg border px-3 py-1.5 text-[12px] font-medium capitalize transition-all", filter === f ? "border-foreground/30 bg-foreground/[0.06] text-foreground" : "border-border/30 text-muted-foreground hover:bg-foreground/[0.02]")}>{f}</button>
         ))}
@@ -78,13 +78,13 @@ export function FeedbackScreen({ workspaceSlug }: { workspaceSlug?: string }) {
                 <div className="grid gap-4">
                   {selected.comment && <div className="rounded-xl border border-border/15 bg-secondary/8 p-4"><p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2">Comment</p><p className="text-[13px] leading-relaxed text-foreground/80">{selected.comment}</p></div>}
                   <dl className="grid grid-cols-2 gap-3 rounded-xl border border-border/15 bg-secondary/8 p-4">
-                    <div><dt className="text-[11px] text-muted-foreground">Agent</dt><dd className="mt-0.5 text-sm font-medium text-foreground">{selectedAgent?.name ?? "—"}</dd></div>
+                    <div><dt className="text-[11px] text-muted-foreground">Agent</dt><dd className="mt-0.5 text-sm font-medium text-foreground">{selectedAgent?.name ?? "None"}</dd></div>
                     <div><dt className="text-[11px] text-muted-foreground">Status</dt><dd className="mt-0.5"><Badge tone={statusTones[selected.status]} size="sm">{selected.status}</Badge></dd></div>
                     <div><dt className="text-[11px] text-muted-foreground">Run</dt><dd className="mt-0.5 text-sm font-medium text-foreground">{selected.run_id}</dd></div>
                     <div><dt className="text-[11px] text-muted-foreground">Rating</dt><dd className="mt-0.5 text-sm font-medium text-foreground capitalize">{selected.rating}</dd></div>
                   </dl>
                   {selectedRun && <div className="rounded-xl border border-border/15 bg-secondary/8 p-4"><p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 mb-2">Linked query</p><p className="text-[13px] font-medium text-foreground">{selectedRun.query}</p><p className="text-[12px] text-muted-foreground/70 mt-2 line-clamp-3">{selectedRun.answer}</p></div>}
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                     <Button variant="outline" size="sm" className="rounded-xl text-xs gap-1.5"><ExternalLink className="h-3 w-3" />View run</Button>
                     <Button variant="outline" size="sm" className="rounded-xl text-xs gap-1.5"><CheckCircle2 className="h-3 w-3" />Mark resolved</Button>
                   </div>

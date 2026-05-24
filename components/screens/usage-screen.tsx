@@ -24,8 +24,8 @@ export function UsageScreen({ workspaceSlug }: { workspaceSlug?: string }) {
 
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="Analytics" title="Usage" description="Track queries, storage, ingestion, and API key activity across your workspace." />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <PageHeader description="Track queries, storage, ingestion, and API key activity across your workspace." />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "Queries", value: totalQueries.toString(), limit: queryLimit.toString(), pct: Math.round((totalQueries / queryLimit) * 100), icon: Zap },
           { label: "Documents", value: documents.length.toString(), limit: "500", pct: Math.round((documents.length / 500) * 100), icon: FileText },

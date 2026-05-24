@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 export function SignUpScreen() {
   return (
     <main className="relative grid min-h-screen place-items-center px-4 py-10 bg-background transition-colors duration-500 overflow-hidden">
-      {/* Elegant Ambient Background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-[20%] -left-[10%] h-[800px] w-[800px] rounded-full bg-foreground/[0.03] blur-[120px]" />
         <div className="absolute top-[20%] -right-[10%] h-[800px] w-[800px] rounded-full bg-foreground/[0.04] blur-[120px]" />
@@ -24,7 +23,7 @@ export function SignUpScreen() {
           <BrandMark size="lg" />
         </div>
 
-        <div className="glass rounded-[2rem] p-8 md:p-10 shadow-2xl shadow-black/5 dark:shadow-black/20">
+        <div className="bg-card rounded-[2rem] p-8 md:p-10 ">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               Create Your Account
@@ -44,7 +43,7 @@ export function SignUpScreen() {
             <Input label="Password" type="password" placeholder="••••••••" />
             
             <Link href="/onboarding" className="mt-4 w-full">
-              <Button className="w-full h-11 text-base rounded-xl shadow-sm">
+              <Button className="w-full h-11 text-base rounded-xl shadow-none">
                 Continue
               </Button>
             </Link>

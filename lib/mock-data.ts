@@ -11,6 +11,13 @@ export const organization = {
   max_execution_tier: "standard",
 };
 
+export const currentUser = {
+  user_id: "usr_1",
+  full_name: "Sarah Chen",
+  email: "admin@acme.com",
+  role: "Admin",
+};
+
 export const workspaces: Workspace[] = [
   {
     workspace_id: "ws_policy",

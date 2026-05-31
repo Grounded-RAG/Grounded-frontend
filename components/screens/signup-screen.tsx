@@ -4,10 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BrandMark } from "@/components/brand";
+import { GoogleMark } from "@/components/google-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { signUpWithEmail } from "@/lib/api";
+import { getGoogleAuthorizationUrl, signUpWithEmail } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 export function SignUpScreen() {
@@ -20,6 +21,20 @@ export function SignUpScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleRedirecting, setIsGoogleRedirecting] = useState(false);
+
+  async function handleGoogleSignUp() {
+    setError(null);
+    setIsGoogleRedirecting(true);
+    try {
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
+      const response = await getGoogleAuthorizationUrl(redirectUri);
+      window.location.href = response.authorization_url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to start Google sign-up");
+      setIsGoogleRedirecting(false);
+    }
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -55,6 +70,15 @@ export function SignUpScreen() {
           <div className="mb-8 text-center">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Create Your Account</h1>
             <p className="mt-2 text-sm text-muted-foreground">Set up your organization and account</p>
+          </div>
+          <Button type="button" variant="outline" disabled={isGoogleRedirecting || isSubmitting} onClick={handleGoogleSignUp} className="mb-5 h-11 w-full rounded-xl text-base shadow-sm">
+            <GoogleMark className="mr-2 h-4 w-4" />
+            {isGoogleRedirecting ? "Redirecting..." : "Continue with Google"}
+          </Button>
+          <div className="mb-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border/30" />
+            <span className="text-xs font-medium text-muted-foreground">or</span>
+            <div className="h-px flex-1 bg-border/30" />
           </div>
           <form onSubmit={handleSubmit} className="grid gap-5">
             <div className="grid grid-cols-2 gap-4">

@@ -1,11 +1,11 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAppTheme } from "@/components/theme-provider";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useAppTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);

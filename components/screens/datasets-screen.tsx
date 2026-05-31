@@ -1,101 +1,41 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Database, Plus, Search, ShieldAlert, Globe, Clock, ChevronRight } from "lucide-react";
+import { Database, MoreHorizontal, Plus, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { datasets } from "@/lib/mock-data";
+import { listDatasetDocuments, listDatasets } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { useApiQuery } from "@/lib/use-api-query";
 import { cn, formatDate, workspaceHref } from "@/lib/utils";
 
 export function DatasetsScreen({ workspaceSlug }: { workspaceSlug?: string }) {
+  const { apiKey, workspaceId } = useAuth();
+  const [search, setSearch] = useState("");
+  const datasetsQuery = useApiQuery(() => listDatasets(apiKey!, workspaceId), [apiKey, workspaceId], Boolean(apiKey));
+  const datasets = datasetsQuery.data ?? [];
+  const filtered = useMemo(() => datasets.filter((dataset) => `${dataset.name} ${dataset.domain}`.toLowerCase().includes(search.toLowerCase())), [datasets, search]);
   const newDatasetHref = workspaceHref(workspaceSlug, "/datasets/new");
+
   return (
-    <div className="animate-fade-in w-full max-w-[1200px] mx-auto space-y-6 sm:space-y-8">
-      {/* ─── Header ─── */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 mb-2">Knowledge Base</p>
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">Datasets</h1>
-          <p className="text-[14px] text-muted-foreground/80 mt-2 max-w-xl font-light">
-            Manage the source-of-truth collections that power your grounded intelligence agents.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href={newDatasetHref}>
-            <Button className="h-10 px-5 rounded-full shadow-sm text-[13px]">
-              <Plus className="mr-2 h-4 w-4" />
-              New Dataset
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* ─── Controls ─── */}
-      <div className="flex items-center gap-4">
-        <div className="flex h-11 flex-1 max-w-md items-center gap-3 rounded-2xl border border-border/30 bg-foreground/[0.02] px-4 transition-all focus-within:bg-foreground/[0.04] focus-within:ring-1 focus-within:ring-foreground/20 shadow-sm">
-          <Search className="h-4 w-4 text-muted-foreground/70" />
-          <input className="flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground/50" placeholder="Search by name, domain, or policy..." />
-        </div>
-      </div>
-
-      {/* ─── Data List ─── */}
-      {datasets.length === 0 ? (
-        <EmptyState icon={<Database className="h-10 w-10" />} title="No datasets yet" description="Create your first dataset to start building a source of truth." action={<Link href={newDatasetHref}><Button><Plus className="h-4 w-4" /> Create dataset</Button></Link>} />
-      ) : (
-        <Card variant="glass" className="rounded-[2rem] overflow-hidden p-2 sm:p-3">
-          <div className="grid gap-2">
-            {datasets.map((dataset, i) => (
-              <Link href={workspaceHref(workspaceSlug, `/datasets/${dataset.dataset_id}`)} key={dataset.dataset_id}>
-                <div className={cn("group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[1.5rem] p-4 sm:p-5 border border-transparent transition-all duration-300 hover:bg-foreground/[0.03] hover:border-border/20", `animate-slide-up delay-${Math.min(i + 1, 6)}`)}>
-                  
-                  {/* Left Column: Icon & Name */}
-                  <div className="flex items-center gap-4 sm:w-[35%]">
-                    <div className="h-12 w-12 shrink-0 rounded-2xl bg-foreground/[0.04] border border-border/20 flex items-center justify-center shadow-sm transition-transform duration-300 group-hover:scale-105">
-                      <Database className="h-5 w-5 text-foreground/70" />
-                    </div>
-                    <div className="min-w-0">
-                      <h2 className="text-[15px] font-semibold text-foreground truncate">{dataset.name}</h2>
-                      <p className="text-[13px] text-muted-foreground/70 truncate">{dataset.domain}</p>
-                    </div>
-                  </div>
-
-                  {/* Middle Column: Metadata Pills */}
-                  <div className="flex flex-wrap items-center gap-3 sm:w-[45%]">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/20 border border-border/10 text-[11px] text-muted-foreground font-medium">
-                      <ShieldAlert className="h-3.5 w-3.5 text-foreground/50" />
-                      {dataset.sensitivity_level}
-                    </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/20 border border-border/10 text-[11px] text-muted-foreground font-medium">
-                      <Clock className="h-3.5 w-3.5 text-foreground/50" />
-                      {dataset.freshness_profile}
-                    </div>
-                    {dataset.allow_web_fallback && (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/20 border border-border/10 text-[11px] text-muted-foreground font-medium">
-                        <Globe className="h-3.5 w-3.5 text-foreground/50" />
-                        Web allowed
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Right Column: Status & Arrow */}
-                  <div className="flex items-center justify-between sm:justify-end gap-6 sm:w-[20%]">
-                    <div className="text-right hidden sm:block">
-                      <p className="text-[11px] uppercase tracking-wider text-muted-foreground/50 mb-0.5">Execution</p>
-                      <Badge tone={dataset.min_execution_tier === "standard" ? "accent" : "warn"} size="sm" className="h-5 text-[10px]">
-                        {dataset.min_execution_tier}
-                      </Badge>
-                    </div>
-                    <div className="h-8 w-8 rounded-full bg-foreground/[0.05] border border-border/10 flex items-center justify-center transition-all duration-300 group-hover:bg-foreground/[0.1] group-hover:border-border/30">
-                      <ChevronRight className="h-4 w-4 text-foreground/60 group-hover:text-foreground" />
-                    </div>
-                  </div>
-                  
-                </div>
-              </Link>
-            ))}
-          </div>
-        </Card>
-      )}
+    <div className="mx-auto w-full max-w-[1000px] animate-fade-in">
+      <div className="mb-6 flex flex-col gap-4 border-b border-border/60 pb-4 sm:flex-row sm:items-center sm:justify-between"><h1 className="text-[22px] font-semibold tracking-tight text-foreground">Datasets</h1><div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"><div className="flex h-9 w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 shadow-sm sm:w-[260px]"><Search className="h-4 w-4 text-muted-foreground/50" /><input className="min-w-0 flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground/45" placeholder="Search Datasets" value={search} onChange={(event) => setSearch(event.target.value)} /></div><Link href={newDatasetHref}><Button className="h-9 w-full rounded-lg px-3 text-[13px] shadow-sm sm:w-auto"><Plus className="h-4 w-4" />Create</Button></Link></div></div>
+      {datasetsQuery.error ? <InlineError message={datasetsQuery.error} /> : datasetsQuery.isLoading ? <p className="text-sm text-muted-foreground">Loading datasets...</p> : filtered.length === 0 ? <EmptyState icon={<Database className="h-10 w-10" />} title="No datasets yet" description="Create your first dataset to start building a source of truth." action={<Link href={newDatasetHref}><Button><Plus className="h-4 w-4" /> Create dataset</Button></Link>} /> : <DatasetTable datasets={filtered} workspaceSlug={workspaceSlug} apiKey={apiKey!} />}
     </div>
   );
+}
+
+function DatasetTable({ datasets, workspaceSlug, apiKey }: { datasets: Awaited<ReturnType<typeof listDatasets>>; workspaceSlug?: string; apiKey: string }) {
+  return <div className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm"><div className="hidden grid-cols-[minmax(120px,0.7fr)_minmax(240px,1.3fr)_minmax(150px,0.8fr)_minmax(110px,0.6fr)_40px] border-b border-border/60 bg-secondary/30 px-4 py-3 text-[12px] font-semibold text-foreground/80 md:grid"><div>ID</div><div>Name</div><div>Created</div><div>Documents</div><div /></div><div className="divide-y divide-border/60">{datasets.map((dataset, index) => <DatasetRow key={dataset.dataset_id} dataset={dataset} index={index} workspaceSlug={workspaceSlug} apiKey={apiKey} />)}</div></div>;
+}
+
+function DatasetRow({ dataset, index, workspaceSlug, apiKey }: { dataset: Awaited<ReturnType<typeof listDatasets>>[number]; index: number; workspaceSlug?: string; apiKey: string }) {
+  const docs = useApiQuery(() => listDatasetDocuments(apiKey, dataset.dataset_id), [apiKey, dataset.dataset_id], Boolean(apiKey));
+  return <Link href={workspaceHref(workspaceSlug, `/datasets/${dataset.dataset_id}`)} className={cn("group grid gap-3 px-4 py-4 transition-colors hover:bg-secondary/30 md:grid-cols-[minmax(120px,0.7fr)_minmax(240px,1.3fr)_minmax(150px,0.8fr)_minmax(110px,0.6fr)_40px] md:items-center", `animate-slide-up delay-${Math.min(index + 1, 6)}`)}><div className="flex items-center gap-2 text-[13px] font-medium text-muted-foreground md:block"><span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 md:hidden">ID</span><span className="font-mono">{dataset.dataset_id.slice(0, 8)}</span></div><div className="min-w-0"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-[14px] font-semibold text-foreground">{dataset.name}</span>{dataset.allow_web_fallback ? <Badge tone="accent" size="sm" className="h-5 bg-sky-100 text-[10px] text-sky-700 dark:bg-sky-950 dark:text-sky-300">Web</Badge> : null}</div><p className="mt-1 truncate text-[12px] text-muted-foreground md:hidden">{dataset.domain}</p></div><div className="flex items-center gap-2 text-[13px] text-muted-foreground"><span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 md:hidden">Created</span>{formatDate(dataset.created_at)}</div><div className="flex items-center gap-2 text-[13px] font-semibold text-foreground"><span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 md:hidden">Documents</span>{docs.data?.length ?? "..."}</div><div className="hidden justify-end md:flex"><span className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors group-hover:bg-secondary group-hover:text-foreground"><MoreHorizontal className="h-4 w-4" /></span></div></Link>;
+}
+
+function InlineError({ message }: { message: string }) {
+  return <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">{message}</div>;
 }

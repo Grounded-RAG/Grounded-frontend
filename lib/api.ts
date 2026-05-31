@@ -5,6 +5,7 @@ import type {
   ApiKeyCreateResponse,
   AuthSmokeResponse,
   CapabilitiesResponse,
+  ChatStreamEvent,
   Conversation,
   DashboardRecentJob,
   DashboardSummary,
@@ -12,6 +13,7 @@ import type {
   DatasetDocument,
   DatasetUploadResponse,
   EmailAuthResponse,
+  FeedbackSubmission,
   IngestionJob,
   Message,
   Run,
@@ -72,6 +74,20 @@ export async function signUpWithEmail(payload: { email: string; password: string
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+  });
+  return parseResponse<EmailAuthResponse>(response);
+}
+
+export async function getGoogleAuthorizationUrl(redirectUri: string) {
+  const response = await fetch(`${API_BASE_URL}/v1/auth/google/start?redirect_uri=${encodeURIComponent(redirectUri)}`);
+  return parseResponse<{ authorization_url: string }>(response);
+}
+
+export async function completeGoogleOAuth(code: string, redirectUri: string) {
+  const response = await fetch(`${API_BASE_URL}/v1/auth/google/callback`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, redirect_uri: redirectUri }),
   });
   return parseResponse<EmailAuthResponse>(response);
 }
@@ -190,6 +206,53 @@ export function sendAgentChat(apiKey: string, agentId: string, payload: { conver
   return request<AgentChatResponse>(`/v1/agents/${agentId}/chat`, apiKey, jsonInit("POST", payload));
 }
 
+export async function* streamAgentChat(apiKey: string, agentId: string, payload: { conversation_id: string; message: string; mode?: UserFacingMode; dataset_id?: string }): AsyncGenerator<ChatStreamEvent> {
+  const response = await fetch(`${API_BASE_URL}/v1/agents/${agentId}/chat/stream`, {
+    method: "POST",
+    headers: {
+      "X-API-Key": apiKey,
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok || !response.body) {
+    const text = await response.text().catch(() => response.statusText);
+    let detail = text;
+    try {
+      detail = (JSON.parse(text) as { detail?: string }).detail ?? text;
+    } catch {
+      // Keep the raw response text when the backend does not return JSON.
+    }
+    throw new ApiError(response.status, detail || response.statusText || "Request failed");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data: ")) continue;
+        const raw = trimmed.slice(6).trim();
+        if (raw) yield JSON.parse(raw) as ChatStreamEvent;
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 export function listRuns(apiKey: string, datasetId?: string | null, limit = 50) {
   const params = new URLSearchParams({ limit: String(limit) });
   if (datasetId) params.set("dataset_id", datasetId);
@@ -198,6 +261,10 @@ export function listRuns(apiKey: string, datasetId?: string | null, limit = 50) 
 
 export function getRun(apiKey: string, runId: string) {
   return request<Run>(`/v1/runs/${runId}`, apiKey);
+}
+
+export function submitFeedback(apiKey: string, runId: string, feedback: FeedbackSubmission) {
+  return request<Run>(`/v1/runs/${runId}/feedback`, apiKey, jsonInit("PATCH", feedback));
 }
 
 export function listApiKeys(apiKey: string) {

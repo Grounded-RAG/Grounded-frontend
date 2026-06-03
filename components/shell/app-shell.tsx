@@ -26,6 +26,13 @@ import { apiBaseUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { cn, workspaceHref } from "@/lib/utils";
 
+const PUBLIC_PATHS = new Set(["/", "/login", "/sign-up", "/onboarding"]);
+
+function isPublicRoute(pathname: string): boolean {
+  if (PUBLIC_PATHS.has(pathname)) return true;
+  return pathname.startsWith("/auth/");
+}
+
 const NAV_GROUPS = [
   {
     label: "Workspace",
@@ -143,13 +150,15 @@ export function AppShell({
     workspaceSlug ?? routeWorkspaceSlug ?? workspace?.slug ?? selectedSlug ?? undefined;
   const currentWorkspaceName = workspace?.name ?? workspaceName ?? "Workspace";
   const isChat = /\/agents\/[^/]+$/.test(pathname) && !pathname.endsWith("/agents/new");
+  const onPublicRoute = isPublicRoute(pathname);
 
   useEffect(() => {
+    if (onPublicRoute) return;
     if (!isLoading && !auth) {
       clearRestoreError();
       router.replace("/login");
     }
-  }, [auth, clearRestoreError, isLoading, router]);
+  }, [auth, clearRestoreError, isLoading, onPublicRoute, router]);
 
   useEffect(() => {
     if (workspace?.workspace_id) {
@@ -159,7 +168,11 @@ export function AppShell({
 
   function handleSignOut() {
     signOut();
-    router.push("/login");
+    router.push("/");
+  }
+
+  if (onPublicRoute) {
+    return <>{children}</>;
   }
 
   if (isLoading || !auth) {

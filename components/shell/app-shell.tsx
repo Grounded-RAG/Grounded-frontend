@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { BrandMark } from "@/components/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { apiBaseUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { cn, workspaceHref } from "@/lib/utils";
 
@@ -66,11 +67,13 @@ export function AppShell({
   const {
     auth,
     isLoading,
+    restoreError,
     signOut,
     workspaces,
     workspaceName,
     workspaceSlug: selectedSlug,
     setWorkspace,
+    clearRestoreError,
   } = useAuth();
 
   const [collapsed, setCollapsed] = useState(false);
@@ -91,8 +94,11 @@ export function AppShell({
     /\/agents\/[^/]+$/.test(pathname) && !pathname.endsWith("/agents/new");
 
   useEffect(() => {
-    if (!isLoading && !auth) router.replace("/login");
-  }, [auth, isLoading, router]);
+    if (!isLoading && !auth) {
+      clearRestoreError();
+      router.replace("/login");
+    }
+  }, [auth, clearRestoreError, isLoading, router]);
 
   useEffect(() => {
     if (workspace?.workspace_id)
@@ -101,8 +107,30 @@ export function AppShell({
 
   if (isLoading || !auth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white text-sm text-zinc-400 dark:bg-zinc-950">
-        Loading…
+      <div className="flex min-h-screen items-center justify-center bg-white px-6 dark:bg-zinc-950">
+        <div className="max-w-md text-center">
+          {restoreError ? (
+            <>
+              <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Could not reach the API</p>
+              <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">{restoreError}</p>
+              <p className="mt-3 text-xs text-zinc-400">
+                API base URL: <code className="text-zinc-600 dark:text-zinc-300">{apiBaseUrl}</code>
+              </p>
+              <p className="mt-3 text-xs text-zinc-400">
+                Set <code className="text-zinc-600 dark:text-zinc-300">NEXT_PUBLIC_API_BASE_URL</code> to your server backend (not localhost), then rebuild the frontend container.
+              </p>
+              <button
+                type="button"
+                onClick={() => router.replace("/login")}
+                className="mt-6 text-sm font-medium text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
+              >
+                Go to sign in
+              </button>
+            </>
+          ) : (
+            <p className="text-sm text-zinc-400">Loading…</p>
+          )}
+        </div>
       </div>
     );
   }

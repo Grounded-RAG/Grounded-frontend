@@ -24,6 +24,7 @@ import type {
 } from "@/lib/types";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000").replace(/\/$/, "");
+const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
 
 export class ApiError extends Error {
   status: number;
@@ -40,6 +41,33 @@ function authHeaders(apiKey: string, extra?: HeadersInit): HeadersInit {
   return { "X-API-Key": apiKey, ...extra };
 }
 
+function networkErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) return error.detail;
+  if (error instanceof Error) {
+    if (error.name === "AbortError") {
+      return `Request timed out. Verify NEXT_PUBLIC_API_BASE_URL (${API_BASE_URL}) is reachable from the browser.`;
+    }
+    return error.message;
+  }
+  return "Network request failed";
+}
+
+async function fetchWithTimeout(
+  url: string,
+  init?: RequestInit,
+  timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (error) {
+    throw new ApiError(0, networkErrorMessage(error));
+  } finally {
+    window.clearTimeout(timeout);
+  }
+}
+
 async function parseResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json") ? await response.json() : await response.text();
@@ -53,7 +81,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
 }
 
 async function request<T>(path: string, apiKey: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetchWithTimeout(`${API_BASE_URL}${path}`, {
     ...init,
     headers: authHeaders(apiKey, init?.headers),
   });
@@ -63,7 +91,7 @@ async function request<T>(path: string, apiKey: string, init?: RequestInit): Pro
 export const apiBaseUrl = API_BASE_URL;
 
 export async function signInWithEmail(payload: { email: string; password: string }) {
-  const response = await fetch(`${API_BASE_URL}/v1/auth/email/sign-in`, {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/v1/auth/email/sign-in`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -72,7 +100,7 @@ export async function signInWithEmail(payload: { email: string; password: string
 }
 
 export async function signUpWithEmail(payload: { email: string; password: string; full_name?: string; organization_name?: string; workspace_name?: string }) {
-  const response = await fetch(`${API_BASE_URL}/v1/auth/email/sign-up`, {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/v1/auth/email/sign-up`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -81,12 +109,12 @@ export async function signUpWithEmail(payload: { email: string; password: string
 }
 
 export async function getGoogleAuthorizationUrl(redirectUri: string) {
-  const response = await fetch(`${API_BASE_URL}/v1/auth/google/start?redirect_uri=${encodeURIComponent(redirectUri)}`);
+  const response = await fetchWithTimeout(`${API_BASE_URL}/v1/auth/google/start?redirect_uri=${encodeURIComponent(redirectUri)}`);
   return parseResponse<{ authorization_url: string }>(response);
 }
 
 export async function completeGoogleOAuth(code: string, redirectUri: string) {
-  const response = await fetch(`${API_BASE_URL}/v1/auth/google/callback`, {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/v1/auth/google/callback`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code, redirect_uri: redirectUri }),
@@ -160,11 +188,11 @@ export async function uploadDatasetDocument(apiKey: string, datasetId: string, f
   const body = new FormData();
   body.append("file", file);
   if (title) body.append("title", title);
-  const response = await fetch(`${API_BASE_URL}/v1/datasets/${datasetId}/upload`, {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/v1/datasets/${datasetId}/upload`, {
     method: "POST",
     headers: authHeaders(apiKey),
     body,
-  });
+  }, 120_000);
   return parseResponse<DatasetUploadResponse>(response);
 }
 
@@ -227,7 +255,7 @@ export function sendAgentChat(apiKey: string, agentId: string, payload: { conver
 }
 
 export async function* streamAgentChat(apiKey: string, agentId: string, payload: { conversation_id: string; message: string; mode?: UserFacingMode; dataset_id?: string }): AsyncGenerator<ChatStreamEvent> {
-  const response = await fetch(`${API_BASE_URL}/v1/agents/${agentId}/chat/stream`, {
+  const response = await fetchWithTimeout(`${API_BASE_URL}/v1/agents/${agentId}/chat/stream`, {
     method: "POST",
     headers: {
       "X-API-Key": apiKey,
@@ -235,7 +263,7 @@ export async function* streamAgentChat(apiKey: string, agentId: string, payload:
       Accept: "text/event-stream",
     },
     body: JSON.stringify(payload),
-  });
+  }, 300_000);
 
   if (!response.ok || !response.body) {
     const text = await response.text().catch(() => response.statusText);

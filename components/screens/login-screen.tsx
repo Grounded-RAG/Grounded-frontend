@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BrandMark } from "@/components/brand";
@@ -8,12 +8,12 @@ import { GoogleMark } from "@/components/google-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getGoogleAuthorizationUrl, signInWithEmail } from "@/lib/api";
+import { apiBaseUrl, getGoogleAuthorizationUrl, signInWithEmail } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 export function LoginScreen() {
   const router = useRouter();
-  const { acceptEmailAuth } = useAuth();
+  const { acceptEmailAuth, auth, isLoading, restoreError, clearRestoreError, workspaceSlug } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +21,12 @@ export function LoginScreen() {
   const [isGoogleRedirecting, setIsGoogleRedirecting] = useState(false);
 
   const appHref = (slug?: string | null) => slug ? `/app/workspace/${slug}/overview` : "/app/overview";
+
+  useEffect(() => {
+    if (!isLoading && auth) {
+      router.replace(appHref(workspaceSlug));
+    }
+  }, [auth, isLoading, router, workspaceSlug]);
 
   async function handleGoogleSignIn() {
     setError(null);
@@ -50,6 +56,14 @@ export function LoginScreen() {
     }
   }
 
+  if (isLoading && !restoreError) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-background px-4">
+        <p className="text-sm text-muted-foreground">Checking session…</p>
+      </main>
+    );
+  }
+
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-background px-4 py-10 transition-colors duration-500">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -76,6 +90,15 @@ export function LoginScreen() {
           <form onSubmit={handleSubmit} className="grid gap-5">
             <Input label="Email address" type="email" placeholder="name@company.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
             <Input label="Password" type="password" placeholder="••••••••" value={password} onChange={(event) => setPassword(event.target.value)} required />
+            {restoreError ? (
+              <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                <p>{restoreError}</p>
+                <p className="mt-2 text-xs opacity-80">API: {apiBaseUrl}</p>
+                <button type="button" className="mt-2 underline" onClick={clearRestoreError}>
+                  Dismiss
+                </button>
+              </div>
+            ) : null}
             {error ? <p className="rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p> : null}
             <Button type="submit" disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl text-base shadow-sm">
               {isSubmitting ? "Signing in..." : "Sign in"}

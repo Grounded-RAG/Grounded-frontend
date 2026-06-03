@@ -4,10 +4,10 @@ import type { HTMLAttributes } from "react";
 type Variant = "default" | "glass" | "elevated" | "subtle";
 
 const variantStyles: Record<Variant, string> = {
-  default: "glass-card",
-  glass: "glass-card",
-  elevated: "elevated-panel",
-  subtle: "border-transparent bg-secondary/30",
+  default: "border border-zinc-100 bg-white dark:border-zinc-800 dark:bg-zinc-900",
+  glass:   "border border-zinc-100 bg-white dark:border-zinc-800 dark:bg-zinc-900",
+  elevated:"border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900",
+  subtle:  "border border-transparent bg-zinc-50 dark:bg-zinc-900/50",
 };
 
 export function Card({

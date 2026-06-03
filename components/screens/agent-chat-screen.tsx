@@ -5,6 +5,7 @@ import {
   Bot,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   Clock,
   FileText,
   Flag,
@@ -12,10 +13,12 @@ import {
   LoaderCircle,
   Plus,
   Send,
+  Settings,
   ThumbsDown,
   ThumbsUp,
   Zap,
 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChatFeedbackModal } from "@/components/screens/chat-feedback-modal";
 import {
@@ -30,6 +33,7 @@ import {
   submitFeedback,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { workspaceHref } from "@/lib/utils";
 import type {
   AgentChatResponse,
   Dataset,
@@ -52,6 +56,123 @@ const STEP_LABELS: Record<WorkflowStepId, string> = {
 };
 
 const STEP_ORDER: WorkflowStepId[] = ["init", "conversation_history", "check_retrieval", "research", "generate"];
+
+type ModeConfig = {
+  label: string;
+  description: string;
+  badge: string;
+  badgeColor: string;
+  dotColor: string;
+  steps: string[];
+};
+
+const MODE_CONFIGS: Record<UserFacingMode, ModeConfig> = {
+  auto: {
+    label: "Auto",
+    description: "Smart routing picks the best pipeline for each query.",
+    badge: "bg-foreground/[0.06] text-foreground/60",
+    badgeColor: "text-foreground/60",
+    dotColor: "bg-foreground/40",
+    steps: ["Analyze Query", "Route → Best mode", "Retrieve Evidence", "Generate Answer"],
+  },
+  instant: {
+    label: "Instant",
+    description: "Fast grounded answers with standard hybrid retrieval.",
+    badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+    badgeColor: "text-amber-600 dark:text-amber-400",
+    dotColor: "bg-amber-500",
+    steps: ["Analyze Query", "Hybrid Retrieve", "Package Evidence", "Generate Answer"],
+  },
+  thinking: {
+    label: "Thinking",
+    description: "Deeper retrieval with cross-encoder reranking. Best for complex questions.",
+    badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    badgeColor: "text-blue-600 dark:text-blue-400",
+    dotColor: "bg-blue-500",
+    steps: ["Analyze Query", "Deep Retrieve ×24", "Rerank Evidence", "Generate Answer"],
+  },
+  verified: {
+    label: "Verified",
+    description: "Highest-assurance path. Every claim is independently verified.",
+    badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+    badgeColor: "text-emerald-600 dark:text-emerald-400",
+    dotColor: "bg-emerald-500",
+    steps: ["Analyze Query", "Deep Retrieve", "Rerank + Verify", "Generate + Verify"],
+  },
+};
+
+function ModeSwitcher({
+  mode,
+  modes,
+  onChange,
+}: {
+  mode: UserFacingMode;
+  modes: UserFacingMode[];
+  onChange: (m: UserFacingMode) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const config = MODE_CONFIGS[mode];
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 rounded-full border border-border/25 bg-foreground/[0.03] px-3 py-1.5 text-[12px] font-semibold transition-all hover:bg-foreground/[0.06]"
+      >
+        <span className={cn("h-2 w-2 rounded-full", config.dotColor)} />
+        <span className={config.badgeColor}>{config.label}</span>
+        <ChevronDown className={cn("h-3 w-3 text-muted-foreground/50 transition-transform", open && "rotate-180")} />
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute bottom-full left-0 z-50 mb-2 w-[320px] overflow-hidden rounded-2xl border border-border/25 bg-background shadow-2xl shadow-black/10 dark:shadow-black/40">
+            <div className="border-b border-border/15 px-4 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/50">Execution mode</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground/60">Changes how the pipeline retrieves and verifies answers.</p>
+            </div>
+            <div className="p-2">
+              {(modes.length > 0 ? modes : (Object.keys(MODE_CONFIGS) as UserFacingMode[])).map((m) => {
+                const cfg = MODE_CONFIGS[m];
+                const active = m === mode;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => { onChange(m); setOpen(false); }}
+                    className={cn(
+                      "w-full rounded-xl p-3 text-left transition-all",
+                      active ? "bg-foreground/[0.05]" : "hover:bg-foreground/[0.03]",
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className={cn("h-2 w-2 rounded-full", cfg.dotColor)} />
+                        <span className={cn("text-[13px] font-semibold", active ? cfg.badgeColor : "text-foreground")}>{cfg.label}</span>
+                      </div>
+                      {active && <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40">Active</span>}
+                    </div>
+                    <p className="text-[12px] text-muted-foreground leading-relaxed mb-2">{cfg.description}</p>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {cfg.steps.map((step, i) => (
+                        <span key={step} className="flex items-center gap-1">
+                          <span className="rounded-md bg-foreground/[0.05] px-1.5 py-0.5 text-[10px] font-medium text-foreground/60">{step}</span>
+                          {i < cfg.steps.length - 1 && <span className="text-muted-foreground/30 text-[10px]">→</span>}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 type LocalExchange =
   | {
@@ -95,6 +216,80 @@ type VisibleMessage =
 function formatMs(ms: number) {
   if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
   return `${ms}ms`;
+}
+
+function renderMarkdown(text: string): React.ReactNode {
+  const lines = text.split("\n");
+  const elements: React.ReactNode[] = [];
+  let key = 0;
+
+  function inlineFormat(line: string): React.ReactNode {
+    const parts: React.ReactNode[] = [];
+    const regex = /(\*\*(.+?)\*\*)|(`(.+?)`)/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(line)) !== null) {
+      if (match.index > lastIndex) parts.push(line.slice(lastIndex, match.index));
+      if (match[1]) parts.push(<strong key={match.index}>{match[2]}</strong>);
+      else if (match[3]) parts.push(<code key={match.index} className="rounded bg-foreground/10 px-1 text-[12px] font-mono">{match[4]}</code>);
+      lastIndex = match.index + match[0].length;
+    }
+    if (lastIndex < line.length) parts.push(line.slice(lastIndex));
+    return parts;
+  }
+
+  let inList = false;
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const trimmed = raw.trim();
+
+    if (trimmed.startsWith("## ")) {
+      if (inList) { inList = false; }
+      elements.push(<p key={key++} className="mt-3 mb-1 text-[13px] font-bold text-foreground">{trimmed.slice(3)}</p>);
+    } else if (trimmed.startsWith("# ")) {
+      if (inList) { inList = false; }
+      elements.push(<p key={key++} className="mt-3 mb-1 text-[14px] font-bold text-foreground">{trimmed.slice(2)}</p>);
+    } else if (/^[-*]\s+/.test(trimmed)) {
+      if (!inList) { inList = true; }
+      elements.push(
+        <div key={key++} className="flex items-start gap-2 leading-relaxed">
+          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-foreground/50" />
+          <span>{inlineFormat(trimmed.replace(/^[-*]\s+/, ""))}</span>
+        </div>
+      );
+    } else if (/^\d+\.\s+/.test(trimmed)) {
+      const num = trimmed.match(/^(\d+)\./)?.[1];
+      elements.push(
+        <div key={key++} className="flex items-start gap-2 leading-relaxed">
+          <span className="mt-0.5 shrink-0 text-[11px] font-bold text-muted-foreground">{num}.</span>
+          <span>{inlineFormat(trimmed.replace(/^\d+\.\s+/, ""))}</span>
+        </div>
+      );
+    } else if (trimmed === "") {
+      inList = false;
+      if (elements.length > 0) elements.push(<div key={key++} className="h-2" />);
+    } else {
+      inList = false;
+      elements.push(<span key={key++} className="block leading-relaxed">{inlineFormat(trimmed)}</span>);
+    }
+  }
+  return <div className="space-y-0.5 text-[14px] text-foreground/90">{elements}</div>;
+}
+
+function EvidenceStrip({ run, onExpand }: { run: Run; onExpand: () => void }) {
+  const count = run.citations.length;
+  if (count === 0) return null;
+  return (
+    <button
+      type="button"
+      onClick={onExpand}
+      className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground/70 hover:text-foreground transition-colors"
+    >
+      <FileText className="h-3 w-3" />
+      Retrieved {count} {count === 1 ? "piece" : "pieces"} of evidence
+      <ChevronRight className="h-3 w-3" />
+    </button>
+  );
 }
 
 function buildRunFromResponse(response: AgentChatResponse, query: string): Run {
@@ -330,7 +525,7 @@ function MessageTrustReview({
   );
 }
 
-export function AgentChatScreen({ id }: { id: string }) {
+export function AgentChatScreen({ id, workspaceSlug }: { id: string; workspaceSlug?: string }) {
   const { apiKey, workspaceId } = useAuth();
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const agentQuery = useApiQuery(() => getAgent(apiKey!, id), [apiKey, id], Boolean(apiKey));
@@ -628,6 +823,19 @@ export function AgentChatScreen({ id }: { id: string }) {
               <p className="text-[11px] leading-tight text-muted-foreground/70">{agent?.dataset_ids.length ?? 0} datasets connected</p>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            <ModeSwitcher
+              mode={mode}
+              modes={modes.map((m) => m.mode)}
+              onChange={(m) => setMode(m)}
+            />
+            <Link href={workspaceHref(workspaceSlug, `/agents/${id}/edit`)}>
+              <button className="flex h-8 items-center gap-1.5 rounded-full border border-border/20 px-3 text-[12px] text-muted-foreground transition-all hover:bg-foreground/[0.04] hover:text-foreground">
+                <Settings className="h-3.5 w-3.5" />
+                Settings
+              </button>
+            </Link>
+          </div>
         </div>
 
         {errorMessage ? (
@@ -662,20 +870,25 @@ export function AgentChatScreen({ id }: { id: string }) {
                                 <LoaderCircle className="h-4 w-4 animate-spin" />
                                 Working through the grounded pipeline
                               </div>
+                            ) : item.error ? (
+                              <p className="text-[14px] text-red-500">{item.content}</p>
                             ) : (
-                              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-foreground/90">{item.content}</p>
+                              renderMarkdown(item.content)
                             )}
                           </div>
                           {msgRun ? (
-                            <MessageTrustReview
-                              run={msgRun}
-                              feedback={messageFeedback[msgRun.run_id]}
-                              onJourney={() => setJourneyRun(msgRun)}
-                              onFeedback={(rating) => {
-                                setFeedbackRunId(msgRun.run_id);
-                                setFeedbackRating(rating);
-                              }}
-                            />
+                            <>
+                              <EvidenceStrip run={msgRun} onExpand={() => setJourneyRun(msgRun)} />
+                              <MessageTrustReview
+                                run={msgRun}
+                                feedback={messageFeedback[msgRun.run_id]}
+                                onJourney={() => setJourneyRun(msgRun)}
+                                onFeedback={(rating) => {
+                                  setFeedbackRunId(msgRun.run_id);
+                                  setFeedbackRating(rating);
+                                }}
+                              />
+                            </>
                           ) : null}
                         </div>
                       </div>
@@ -713,11 +926,6 @@ export function AgentChatScreen({ id }: { id: string }) {
               </div>
               <div className="mt-1 flex items-center justify-between border-t border-border/10 px-3 pb-1.5 pt-1">
                 <div className="flex min-w-0 items-center gap-2">
-                  <SelectPill value={mode} onChange={(value) => setMode(value as UserFacingMode)}>
-                    {(modes.length > 0 ? modes : [{ mode: "auto", label: "Auto" }]).map((item) => (
-                      <option key={item.mode} value={item.mode}>{item.label}</option>
-                    ))}
-                  </SelectPill>
                   {attachedDatasets.length > 1 ? (
                     <SelectPill value={selectedDatasetId} onChange={setSelectedDatasetId}>
                       {attachedDatasets.map((dataset: Dataset) => (
@@ -727,10 +935,10 @@ export function AgentChatScreen({ id }: { id: string }) {
                   ) : null}
                   <div className="hidden items-center gap-1.5 text-[10px] font-medium text-muted-foreground/60 sm:flex">
                     <Zap className="h-3 w-3" />
-                    Grounded securely in your datasets
+                    Grounded · {MODE_CONFIGS[mode]?.label ?? mode}
                   </div>
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground/40">Return to send</span>
+                <span className="text-[10px] font-medium text-muted-foreground/40">↵ to send</span>
               </div>
             </div>
           </div>

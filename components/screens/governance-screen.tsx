@@ -1,51 +1,82 @@
-import { Clock, Edit2, ShieldCheck } from "lucide-react";
+"use client";
+
+import { Clock, Database, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
-import { governancePolicies, auditLog } from "@/lib/mock-data";
+import { EmptyState } from "@/components/ui/empty-state";
+import { listAuditLogs, listDatasets } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { useApiQuery } from "@/lib/use-api-query";
 import { formatDate } from "@/lib/utils";
 
-const categoryColors: Record<string, string> = {
-  Data: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  Retrieval: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  Execution: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
-  Security: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+const ACTION_COLORS: Record<string, string> = {
+  "agent.created": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  "agent.updated": "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+  "agent.deleted": "bg-red-500/10 text-red-600 dark:text-red-400",
+  "dataset.created": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  "dataset.deleted": "bg-red-500/10 text-red-600 dark:text-red-400",
+  "document.uploaded": "bg-amber-500/10 text-amber-600 dark:text-amber-400",
 };
 
 export function GovernanceScreen({ workspaceSlug }: { workspaceSlug?: string }) {
+  void workspaceSlug;
+  const { apiKey, workspaceId } = useAuth();
+  const auditQuery = useApiQuery(() => listAuditLogs(apiKey!, workspaceId, 1, 50), [apiKey, workspaceId], Boolean(apiKey));
+  const datasetsQuery = useApiQuery(() => listDatasets(apiKey!, workspaceId), [apiKey, workspaceId], Boolean(apiKey));
+
+  const logs = auditQuery.data?.items ?? [];
+  const datasets = datasetsQuery.data ?? [];
+
   return (
     <div className="page-grid animate-fade-in">
-      <PageHeader eyebrow="Platform" title="Governance" description="Configure organization-wide policies, data controls, and audit settings." />
+      <PageHeader
+        eyebrow="Platform"
+        title="Governance"
+        description="Audit trail, data access controls, and policy review for your workspace."
+      />
       <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
         <div className="grid gap-6">
-          {/* Policies */}
+          {/* Dataset policies derived from real dataset settings */}
           <Card variant="glass" className="rounded-2xl">
-            <CardHeader title="Policies" eyebrow="Organization defaults" />
-            <div className="grid gap-2">
-              {governancePolicies.map((p) => (
-                <div key={p.policy_id} className="flex items-center justify-between rounded-xl border border-border/15 bg-secondary/8 p-4 hover:bg-secondary/15 transition-colors group">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-xl bg-foreground/[0.04] flex items-center justify-center border border-border/20">
-                      <ShieldCheck className="h-4 w-4 text-foreground/60" />
+            <CardHeader title="Dataset policies" eyebrow="Active data controls" />
+            {datasets.length === 0 ? (
+              <EmptyState
+                icon={<Database className="h-8 w-8" />}
+                title="No datasets yet"
+                description="Dataset access policies will appear here once you create a dataset."
+              />
+            ) : (
+              <div className="grid gap-2">
+                {datasets.map((ds) => (
+                  <div
+                    key={ds.dataset_id}
+                    className="flex items-center justify-between rounded-xl border border-border/15 bg-secondary/8 p-4 transition-colors hover:bg-secondary/15"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/20 bg-foreground/[0.04]">
+                        <ShieldCheck className="h-4 w-4 text-foreground/60" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{ds.name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Sensitivity: {ds.sensitivity_level} · Min tier: {ds.min_execution_tier} · Web fallback: {ds.allow_web_fallback ? "on" : "off"}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{p.name}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{p.description}</p>
+                    <div className="flex items-center gap-2">
+                      <Badge tone="neutral" size="sm">{ds.freshness_profile}</Badge>
+                      <Badge tone={ds.sensitivity_level === "restricted" || ds.sensitivity_level === "confidential" ? "warn" : "success"} size="sm">
+                        {ds.sensitivity_level}
+                      </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-[11px] font-medium rounded-md px-2 py-0.5 ${categoryColors[p.category] ?? "bg-foreground/5 text-muted-foreground"}`}>{p.category}</span>
-                    <Badge tone="neutral" size="sm">{p.value}</Badge>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </Card>
-          {/* SSO/Security */}
+
+          {/* Identity & Access — static configuration display */}
           <Card variant="glass" className="rounded-2xl">
             <CardHeader title="Identity & Access" eyebrow="Security" />
             <div className="grid sm:grid-cols-2 gap-3">
@@ -63,26 +94,46 @@ export function GovernanceScreen({ workspaceSlug }: { workspaceSlug?: string }) 
             </div>
           </Card>
         </div>
-        {/* Audit log sidebar */}
+
+        {/* Audit log — real data */}
         <Card variant="glass" className="rounded-2xl">
-          <CardHeader title="Audit log" eyebrow="Recent activity" />
-          <div className="grid gap-3">
-            {auditLog.map((entry) => (
-              <div key={entry.entry_id} className="relative pl-6 pb-4 last:pb-0">
-                <div className="absolute left-0 top-1 h-3 w-3 rounded-full border-2 border-foreground/20 bg-background" />
-                {entry.entry_id !== auditLog[auditLog.length - 1].entry_id && (
-                  <div className="absolute left-[5px] top-4 bottom-0 w-px bg-border/30" />
-                )}
-                <p className="text-[13px] font-medium text-foreground">{entry.action}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{entry.detail}</p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[10px] text-muted-foreground/60">{entry.actor}</span>
-                  <span className="text-[10px] text-muted-foreground/40">·</span>
-                  <span className="text-[10px] text-muted-foreground/60">{formatDate(entry.created_at)}</span>
+          <CardHeader title="Audit log" eyebrow={`${auditQuery.data?.total ?? 0} total events`} />
+          {auditQuery.isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading audit log…</p>
+          ) : logs.length === 0 ? (
+            <EmptyState
+              icon={<Clock className="h-8 w-8" />}
+              title="No events yet"
+              description="Actions like creating agents or uploading documents will appear here."
+            />
+          ) : (
+            <div className="grid gap-3 overflow-y-auto max-h-[480px] scrollbar-none">
+              {logs.map((entry, index) => (
+                <div key={entry.log_id} className="relative pl-6 pb-4 last:pb-0">
+                  <div className="absolute left-0 top-1 h-3 w-3 rounded-full border-2 border-foreground/20 bg-background" />
+                  {index < logs.length - 1 && (
+                    <div className="absolute left-[5px] top-4 bottom-0 w-px bg-border/30" />
+                  )}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-[13px] font-medium text-foreground">{entry.action}</p>
+                    <span className={`text-[10px] font-medium rounded-md px-1.5 py-0.5 ${ACTION_COLORS[entry.action] ?? "bg-foreground/5 text-muted-foreground"}`}>
+                      {entry.resource_type}
+                    </span>
+                  </div>
+                  {entry.summary && (
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{entry.summary}</p>
+                  )}
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {entry.resource_id && (
+                      <span className="text-[10px] font-mono text-muted-foreground/60">{entry.resource_id.slice(0, 8)}</span>
+                    )}
+                    <span className="text-[10px] text-muted-foreground/40">·</span>
+                    <span className="text-[10px] text-muted-foreground/60">{formatDate(entry.created_at)}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </Card>
       </div>
     </div>

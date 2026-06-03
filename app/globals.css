@@ -8,36 +8,34 @@
 @layer base {
   :root {
     --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
-    
-    --background: 40 30% 96%;
-    --bg-image: 
-      var(--noise),
-      radial-gradient(circle at 15% 0%, hsl(45 60% 99%) 0%, transparent 55%),
-      radial-gradient(circle at 85% 100%, hsl(30 40% 92%) 0%, transparent 60%);
-      
-    --foreground: 35 15% 12%;
+
+    /* ── Clean white palette ── */
+    --background: 0 0% 100%;
+    --bg-image: none;
+
+    --foreground: 0 0% 9%;
 
     --card: 0 0% 100%;
     --card-foreground: 0 0% 9%;
 
-    --primary: 35 10% 12%;
-    --primary-foreground: 35 0% 100%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 35 15% 94%;
-    --secondary-foreground: 35 15% 25%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 35 15% 92%;
-    --muted-foreground: 35 10% 45%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 44%;
 
-    --accent: 35 15% 20%;
-    --accent-foreground: 35 0% 100%;
+    --accent: 0 0% 9%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 35 15% 88%;
-    --input: 35 15% 88%;
-    --ring: 35 15% 30%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 30%;
 
     /* Trust surface colors */
     --confidence-high: 145 60% 42%;
@@ -49,10 +47,10 @@
     --danger: 0 72% 50%;
 
     /* Glass tokens — light */
-    --glass-bg: 0 0% 0% / 0.04;
-    --glass-border: 0 0% 0% / 0.06;
-    --glass-shine: 0 0% 100% / 0.30;
-    --glass-shadow: 0 0% 0% / 0.02;
+    --glass-bg: 0 0% 100% / 0.80;
+    --glass-border: 0 0% 0% / 0.07;
+    --glass-shine: 0 0% 100% / 0.60;
+    --glass-shadow: 0 0% 0% / 0.04;
     --glass-blur: 16px;
   }
 
@@ -239,4 +237,15 @@
   .delay-4 { animation-delay: 0.2s; }
   .delay-5 { animation-delay: 0.25s; }
   .delay-6 { animation-delay: 0.3s; }
+
+  /* Radial gradient utility used in landing page */
+  .bg-gradient-radial {
+    background-image: radial-gradient(var(--tw-gradient-stops));
+  }
+
+  /* Improved Inter font rendering */
+  h1, h2, h3 {
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
 }

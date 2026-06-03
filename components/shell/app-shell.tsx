@@ -1,87 +1,162 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, BarChart3, Bot, BookOpen, ChevronLeft, CreditCard, Database, KeyRound, LayoutDashboard, LogOut, Menu, MessageSquareText, Settings, ShieldCheck, Users, X } from "lucide-react";
+import {
+  Activity,
+  BookOpen,
+  Bot,
+  ChevronLeft,
+  ChevronRight,
+  Code2,
+  Database,
+  KeyRound,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  MessageSquareText,
+  Settings,
+  Shield,
+  X,
+} from "lucide-react";
 import { BrandMark } from "@/components/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { cn, workspaceHref } from "@/lib/utils";
 
-const navGroups = [
+const NAV_GROUPS = [
   {
     label: "Workspace",
     items: [
-      { label: "Overview", icon: LayoutDashboard, path: "/overview" },
-      { label: "Datasets", icon: Database, path: "/datasets" },
-      { label: "Agents", icon: Bot, path: "/agents" },
-      { label: "Runs", icon: Activity, path: "/runs" },
+      { label: "Overview",  icon: LayoutDashboard, path: "/overview" },
+      { label: "Datasets",  icon: Database,        path: "/datasets" },
+      { label: "Agents",    icon: Bot,             path: "/agents" },
+      { label: "Runs",      icon: Activity,        path: "/runs" },
     ],
   },
   {
-    label: "System",
+    label: "Admin",
     items: [
-      { label: "Usage", icon: Activity, path: "/usage" },
-      { label: "Settings", icon: Settings, path: "/settings" },
-      { label: "API Keys", icon: KeyRound, path: "/api-keys" },
+      { label: "Usage",      icon: Activity,          path: "/usage" },
+      { label: "Feedback",   icon: MessageSquareText,  path: "/feedback" },
+      { label: "Governance", icon: Shield,             path: "/governance" },
+      { label: "Settings",   icon: Settings,           path: "/settings" },
+    ],
+  },
+  {
+    label: "Developer",
+    items: [
+      { label: "API Keys",      icon: KeyRound, path: "/api-keys" },
+      { label: "API Reference", icon: Code2,    path: "/api-reference" },
+      { label: "Documentation", icon: BookOpen, path: "/docs" },
     ],
   },
 ];
 
-export function AppShell({ children, workspaceSlug }: { children: React.ReactNode; workspaceSlug?: string }) {
+export function AppShell({
+  children,
+  workspaceSlug,
+}: {
+  children: React.ReactNode;
+  workspaceSlug?: string;
+}) {
   const pathname = usePathname();
   const router = useRouter();
-  const { auth, isLoading, signOut, workspaces, workspaceName, workspaceSlug: selectedSlug, setWorkspace } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const {
+    auth,
+    isLoading,
+    signOut,
+    workspaces,
+    workspaceName,
+    workspaceSlug: selectedSlug,
+    setWorkspace,
+  } = useAuth();
+
+  const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const routeWorkspaceSlug = pathname.match(/\/app\/workspace\/([^/]+)/)?.[1];
-  const workspace = useMemo(() => workspaces.find((w) => w.slug === (workspaceSlug ?? routeWorkspaceSlug)) ?? workspaces.find((w) => w.slug === selectedSlug) ?? workspaces[0], [routeWorkspaceSlug, selectedSlug, workspaceSlug, workspaces]);
-  const effectiveSlug = workspaceSlug ?? routeWorkspaceSlug ?? workspace?.slug ?? selectedSlug ?? undefined;
+  const workspace = useMemo(
+    () =>
+      workspaces.find((w) => w.slug === (workspaceSlug ?? routeWorkspaceSlug)) ??
+      workspaces.find((w) => w.slug === selectedSlug) ??
+      workspaces[0],
+    [routeWorkspaceSlug, selectedSlug, workspaceSlug, workspaces],
+  );
+  const effectiveSlug =
+    workspaceSlug ?? routeWorkspaceSlug ?? workspace?.slug ?? selectedSlug ?? undefined;
   const currentWorkspaceName = workspace?.name ?? workspaceName ?? "Workspace";
-  const isChat = /\/agents\/[^/]+$/.test(pathname) && !pathname.endsWith("/agents/new");
-  const expanded = isChat ? false : sidebarOpen;
+  const isChat =
+    /\/agents\/[^/]+$/.test(pathname) && !pathname.endsWith("/agents/new");
 
   useEffect(() => {
     if (!isLoading && !auth) router.replace("/login");
   }, [auth, isLoading, router]);
 
   useEffect(() => {
-    if (workspace && workspace.workspace_id) setWorkspace(workspace.workspace_id, workspace.name, workspace.slug);
+    if (workspace?.workspace_id)
+      setWorkspace(workspace.workspace_id, workspace.name, workspace.slug);
   }, [workspace?.workspace_id]);
 
   if (isLoading || !auth) {
-    return <div className="grid min-h-screen place-items-center bg-background text-sm text-muted-foreground">Loading workspace...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white text-sm text-zinc-400 dark:bg-zinc-950">
+        Loading…
+      </div>
+    );
   }
 
+  const sidebarWidth = collapsed ? "w-[60px]" : "w-[220px]";
+
   const sidebarContent = (
-    <>
-      <div className={cn("flex items-center pb-4 pt-6 transition-all duration-300", expanded ? "px-6" : "justify-center px-0")}>
-        {expanded ? <BrandMark size="sm" /> : (
-          <Link href="/" className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border/30 bg-card shadow-sm" aria-label="Grounded home">
-            <Image src="/Grounded_light_logo.jpg" alt="Grounded" width={28} height={28} className="h-7 w-7 rounded-lg object-cover" priority />
+    <div className="flex h-full flex-col">
+      {/* Logo */}
+      <div
+        className={cn(
+          "flex h-14 shrink-0 items-center border-b border-zinc-100 dark:border-zinc-800",
+          collapsed ? "justify-center px-0" : "px-5",
+        )}
+      >
+        {collapsed ? (
+          <Link href="/" className="flex h-8 w-8 items-center justify-center rounded-lg">
+            <Bot className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
           </Link>
+        ) : (
+          <BrandMark size="sm" />
         )}
       </div>
-      <nav className="scrollbar-none flex-1 space-y-6 overflow-y-auto px-3 py-4">
-        {navGroups.map((group) => (
-          <div key={group.label}>
-            {expanded && <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60">{group.label}</p>}
-            <div className="space-y-1">
+
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto py-3 scrollbar-none">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="mb-4">
+            {!collapsed && (
+              <p className="mb-1 px-4 text-[10px] font-bold uppercase tracking-[0.1em] text-zinc-400 dark:text-zinc-500">
+                {group.label}
+              </p>
+            )}
+            <div className="space-y-0.5 px-2">
               {group.items.map((item) => {
                 const Icon = item.icon;
-                const isExternal = "external" in item && item.external;
-                const href = isExternal ? item.path : workspaceHref(effectiveSlug, item.path);
-                const active = !isExternal && pathname.startsWith(href);
+                const href = workspaceHref(effectiveSlug, item.path);
+                const active = pathname.startsWith(href);
                 return (
-                  <Link key={item.label} href={href} target={isExternal ? "_blank" : undefined} rel={isExternal ? "noopener noreferrer" : undefined} onClick={() => setMobileOpen(false)} className={cn("group relative flex items-center gap-3 rounded-xl transition-all duration-200", expanded ? "h-10 px-3" : "mx-auto h-10 w-10 justify-center", active ? "bg-foreground/[0.04] font-semibold text-foreground shadow-sm" : "text-muted-foreground/80 hover:bg-foreground/[0.03] hover:text-foreground")}>
-                    {active && expanded && <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-r-full bg-foreground" />}
-                    <Icon className={cn("shrink-0", expanded ? "h-[18px] w-[18px]" : "h-5 w-5")} />
-                    {expanded && <span className="flex-1 truncate text-[13px]">{item.label}</span>}
+                  <Link
+                    key={item.label}
+                    href={href}
+                    onClick={() => setMobileOpen(false)}
+                    title={collapsed ? item.label : undefined}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors",
+                      collapsed && "justify-center",
+                      active
+                        ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-white"
+                        : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200",
+                    )}
+                  >
+                    <Icon className="h-[15px] w-[15px] shrink-0" />
+                    {!collapsed && <span>{item.label}</span>}
                   </Link>
                 );
               })}
@@ -89,40 +164,125 @@ export function AppShell({ children, workspaceSlug }: { children: React.ReactNod
           </div>
         ))}
       </nav>
-      <div className="mt-auto p-3">
-        <button className={cn("flex h-10 items-center justify-center rounded-xl text-muted-foreground/60 transition-colors hover:bg-foreground/[0.03] hover:text-foreground", expanded ? "w-full gap-2" : "mx-auto w-10")} onClick={() => setSidebarOpen((value) => !value)} disabled={isChat}>
-          <ChevronLeft className={cn("h-4 w-4 transition-transform duration-300", !expanded && "rotate-180")} />
-          {expanded && <span className="text-[13px] font-medium">Collapse</span>}
+
+      {/* Bottom: user + collapse */}
+      <div className="shrink-0 border-t border-zinc-100 p-3 dark:border-zinc-800">
+        {!collapsed && (
+          <div className="mb-2 flex items-center gap-2.5 rounded-lg px-2 py-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-[11px] font-bold text-white dark:bg-zinc-200 dark:text-zinc-900">
+              {auth.tenant_name?.charAt(0)?.toUpperCase() ?? "U"}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[12px] font-semibold text-zinc-800 dark:text-zinc-200">
+                {auth.tenant_name ?? "Workspace"}
+              </p>
+              <p className="truncate text-[10px] uppercase tracking-wider text-zinc-400">
+                {auth.subscription_plan}
+              </p>
+            </div>
+            <button
+              onClick={() => { signOut(); router.push("/login"); }}
+              className="text-zinc-400 transition-colors hover:text-zinc-700 dark:hover:text-zinc-200"
+              title="Sign out"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={() => setCollapsed((v) => !v)}
+          className={cn(
+            "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-[12px] font-medium text-zinc-400 transition-colors hover:bg-zinc-50 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300",
+            collapsed && "justify-center",
+          )}
+        >
+          {collapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <>
+              <ChevronLeft className="h-4 w-4" />
+              <span>Collapse</span>
+            </>
+          )}
         </button>
       </div>
-    </>
+    </div>
   );
 
   return (
-    <div className={cn("relative flex flex-col overflow-x-hidden bg-background transition-colors duration-500", isChat ? "h-screen overflow-hidden" : "min-h-screen")}>
-      {mobileOpen && <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md md:hidden" onClick={() => setMobileOpen(false)} />}
-      <aside className={cn("glass fixed bottom-4 left-4 top-4 z-40 hidden flex-col overflow-hidden rounded-[2rem] border border-border/30 shadow-2xl shadow-black/5 transition-all duration-500 md:flex", expanded ? "w-60" : "w-[4.5rem]")}>{sidebarContent}</aside>
-      <aside className={cn("glass fixed inset-y-4 left-4 z-50 flex w-60 flex-col overflow-hidden rounded-[2rem] border border-border/30 shadow-2xl shadow-black/10 transition-transform duration-500 md:hidden", mobileOpen ? "translate-x-0" : "-translate-x-[120%]")}> 
-        <button className="absolute right-4 top-5 text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}><X className="h-4 w-4" /></button>
+    <div className="flex min-h-screen bg-white dark:bg-zinc-950">
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar — desktop */}
+      <aside
+        className={cn(
+          "fixed bottom-0 left-0 top-0 z-30 hidden flex-col border-r border-zinc-100 bg-white transition-all duration-300 dark:border-zinc-800 dark:bg-zinc-950 md:flex",
+          sidebarWidth,
+        )}
+      >
         {sidebarContent}
       </aside>
-      <div className={cn("relative z-10 flex flex-1 flex-col transition-all duration-500", expanded ? "md:pl-[17rem]" : "md:pl-[6.5rem]", isChat ? "h-screen" : "min-h-screen")}>
-        <div className="sticky top-0 z-30 shrink-0 px-4 pb-2 pt-4">
-          <header className="glass mx-auto flex h-14 max-w-7xl items-center gap-4 rounded-full border border-border/30 px-5 shadow-sm">
-            <Button className="-ml-2 rounded-full hover:bg-foreground/5 md:hidden" variant="ghost" size="icon" onClick={() => setMobileOpen(true)}><Menu className="h-[18px] w-[18px] text-foreground/80" /></Button>
-            <div className="flex min-w-0 flex-1 items-center gap-3">
-              <div className="hidden h-6 items-center rounded-md border border-border/20 bg-foreground/[0.04] px-2.5 sm:flex"><span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">Workspace</span></div>
-              <p className="truncate text-[14px] font-semibold tracking-tight text-foreground">{currentWorkspaceName}</p>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Badge tone="accent" size="sm" className="hidden text-[10px] uppercase tracking-wider sm:flex">{auth.subscription_plan}</Badge>
-              <div className="hidden h-4 w-px bg-border/40 sm:block" />
-              <ThemeToggle />
-              <button onClick={() => { signOut(); router.push("/login"); }} className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground/80 transition-all duration-200 hover:bg-foreground/[0.05] hover:text-foreground"><LogOut className="h-4 w-4" /></button>
-            </div>
-          </header>
-        </div>
-        <main className={cn("mx-auto flex min-h-0 w-full flex-1 flex-col", isChat ? "px-4 pb-4" : "max-w-7xl px-4 py-8 md:px-8 md:py-10")}>{children}</main>
+
+      {/* Sidebar — mobile */}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col border-r border-zinc-100 bg-white shadow-xl transition-transform duration-300 dark:border-zinc-800 dark:bg-zinc-950 md:hidden",
+          mobileOpen ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
+        <button
+          className="absolute right-3 top-4 text-zinc-400 hover:text-zinc-700"
+          onClick={() => setMobileOpen(false)}
+        >
+          <X className="h-4 w-4" />
+        </button>
+        {sidebarContent}
+      </aside>
+
+      {/* Main */}
+      <div
+        className={cn(
+          "flex flex-1 flex-col transition-all duration-300",
+          collapsed ? "md:pl-[60px]" : "md:pl-[220px]",
+          isChat && "h-screen overflow-hidden",
+        )}
+      >
+        {/* Top bar */}
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-4 border-b border-zinc-100 bg-white px-5 dark:border-zinc-800 dark:bg-zinc-950">
+          <button
+            className="text-zinc-400 hover:text-zinc-700 md:hidden"
+            onClick={() => setMobileOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <span className="rounded border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">
+              Workspace
+            </span>
+            <span className="text-zinc-300 dark:text-zinc-700">/</span>
+            <span className="truncate text-[14px] font-semibold text-zinc-900 dark:text-zinc-100">
+              {currentWorkspaceName}
+            </span>
+          </div>
+          <ThemeToggle />
+        </header>
+
+        {/* Content */}
+        <main
+          className={cn(
+            "flex flex-1 flex-col",
+            isChat ? "min-h-0 px-4 pb-4" : "px-6 py-8 md:px-8 md:py-10",
+          )}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

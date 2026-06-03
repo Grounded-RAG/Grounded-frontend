@@ -1,8 +1,10 @@
 import type {
   Agent,
   AgentChatResponse,
+  AgentUpdateRequest,
   ApiKey,
   ApiKeyCreateResponse,
+  AuditLogListResponse,
   AuthSmokeResponse,
   CapabilitiesResponse,
   ChatStreamEvent,
@@ -186,8 +188,26 @@ export function createAgent(apiKey: string, payload: {
   return request<Agent>("/v1/agents", apiKey, jsonInit("POST", payload));
 }
 
+export function updateAgent(apiKey: string, agentId: string, payload: AgentUpdateRequest) {
+  return request<Agent>(`/v1/agents/${agentId}`, apiKey, jsonInit("PATCH", payload));
+}
+
+export function deleteAgent(apiKey: string, agentId: string) {
+  return request<void>(`/v1/agents/${agentId}`, apiKey, { method: "DELETE" });
+}
+
 export function attachDatasetToAgent(apiKey: string, agentId: string, datasetId: string) {
   return request<Agent>(`/v1/agents/${agentId}/datasets`, apiKey, jsonInit("POST", { dataset_id: datasetId }));
+}
+
+export function detachDatasetFromAgent(apiKey: string, agentId: string, datasetId: string) {
+  return request<void>(`/v1/agents/${agentId}/datasets/${datasetId}`, apiKey, { method: "DELETE" });
+}
+
+export function listAuditLogs(apiKey: string, workspaceId?: string | null, page = 1, pageSize = 50) {
+  const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
+  if (workspaceId) params.set("workspace_id", workspaceId);
+  return request<AuditLogListResponse>(`/v1/audit-logs?${params.toString()}`, apiKey);
 }
 
 export function listAgentConversations(apiKey: string, agentId: string) {

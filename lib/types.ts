@@ -333,10 +333,27 @@ export interface GovernancePolicy {
 }
 
 export interface AuditLogEntry {
-  entry_id: string;
-  actor: string;
+  log_id: string;
+  workspace_id: string | null;
+  actor_key_id: string | null;
   action: string;
-  resource: string;
-  detail: string;
+  resource_type: string;
+  resource_id: string | null;
+  summary: string | null;
   created_at: string;
+}
+
+export interface AuditLogListResponse {
+  items: AuditLogEntry[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface AgentUpdateRequest {
+  name?: string;
+  description?: string;
+  system_instructions?: string;
+  default_mode?: UserFacingMode;
+  allowed_modes?: UserFacingMode[];
 }

@@ -304,9 +304,9 @@ export const governancePolicies: GovernancePolicy[] = [
 ];
 
 export const auditLog: AuditLogEntry[] = [
-  { entry_id: "aud_1", actor: "Sarah Chen", action: "Updated policy", resource: "Web fallback policy", detail: "Changed from Enabled to Disabled", created_at: "2026-04-20T09:30:00Z" },
-  { entry_id: "aud_2", actor: "Sarah Chen", action: "Invited member", resource: "Alex Rivera", detail: "Invited as Viewer", created_at: "2026-05-03T15:00:00Z" },
-  { entry_id: "aud_3", actor: "James Okafor", action: "Created dataset", resource: "Support Escalation Notes", detail: "Sensitivity: internal, Tier: standard", created_at: "2026-04-21T16:40:00Z" },
-  { entry_id: "aud_4", actor: "Sarah Chen", action: "Updated policy", resource: "MFA enforcement", detail: "Changed from Optional to Required for admins", created_at: "2026-05-01T08:00:00Z" },
-  { entry_id: "aud_5", actor: "James Okafor", action: "Revoked API key", resource: "Old staging key", detail: "Key revoked due to rotation policy", created_at: "2026-04-25T11:05:00Z" },
+  { log_id: "aud_1", workspace_id: null, actor_key_id: null, action: "policy.updated", resource_type: "policy", resource_id: "web_fallback", summary: "Changed web fallback from Enabled to Disabled", created_at: "2026-04-20T09:30:00Z" },
+  { log_id: "aud_2", workspace_id: null, actor_key_id: null, action: "member.invited", resource_type: "member", resource_id: "alex_rivera", summary: "Invited member as Viewer", created_at: "2026-05-03T15:00:00Z" },
+  { log_id: "aud_3", workspace_id: null, actor_key_id: null, action: "dataset.created", resource_type: "dataset", resource_id: "ds_support", summary: "Created dataset: Support Escalation Notes", created_at: "2026-04-21T16:40:00Z" },
+  { log_id: "aud_4", workspace_id: null, actor_key_id: null, action: "policy.updated", resource_type: "policy", resource_id: "mfa", summary: "MFA changed to Required for admins", created_at: "2026-05-01T08:00:00Z" },
+  { log_id: "aud_5", workspace_id: null, actor_key_id: null, action: "api_key.revoked", resource_type: "api_key", resource_id: "old_staging", summary: "API key revoked due to rotation policy", created_at: "2026-04-25T11:05:00Z" },
 ];

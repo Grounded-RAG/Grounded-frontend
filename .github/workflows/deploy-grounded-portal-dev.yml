@@ -13,6 +13,25 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Prepare deploy package
+        run: |
+          rm -rf deploy-package
+          mkdir -p deploy-package
+
+          rsync -a ./ deploy-package/ \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='out' \
+            --exclude='dist' \
+            --exclude='build' \
+            --exclude='coverage' \
+            --exclude='.turbo' \
+            --exclude='.cache' \
+            --exclude='deploy-package'
+
+          du -sh deploy-package
+
       - name: Upload code to server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -20,8 +39,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
-          source: '.'
+          source: 'deploy-package/*'
           target: '/home/ubuntu/grounded-portal-dev'
+          strip_components: 1
+          overwrite: true
 
       - name: SSH into Server and Deploy Grounded Portal
         uses: appleboy/ssh-action@v1.0.3

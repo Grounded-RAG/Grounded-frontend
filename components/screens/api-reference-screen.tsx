@@ -236,10 +236,10 @@ const API_GROUPS: EndpointGroup[] = [
 
 /* ─── Method badge ─── */
 const METHOD_STYLES: Record<Method, string> = {
-  GET:    "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
-  POST:   "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300",
-  PATCH:  "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
-  PUT:    "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
+  GET: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+  POST: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300",
+  PATCH: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
+  PUT: "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300",
   DELETE: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
 };
 
@@ -356,7 +356,7 @@ export function ApiReferenceScreen() {
         <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-zinc-400">Developer</p>
         <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">API Reference</h1>
         <p className="mt-1.5 text-[14px] text-zinc-500">
-          Base URL: <code className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[13px] text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">http://localhost:8000</code>
+          Base URL: <code className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[13px] text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">http://51.20.18.111:8000</code>
           {" "}· Authenticate with header <code className="rounded bg-zinc-100 px-2 py-0.5 font-mono text-[13px] text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">X-API-Key: YOUR_KEY</code>
         </p>
       </div>

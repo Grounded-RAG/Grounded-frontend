@@ -27,7 +27,7 @@ const config: Config = {
         glass: "0 8px 32px hsl(0 0% 0% / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.06)",
       },
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["var(--font-poppins)", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
       },
       borderRadius: {
         xl: "0.875rem",

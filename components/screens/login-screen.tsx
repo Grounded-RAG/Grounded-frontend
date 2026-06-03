@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BrandMark } from "@/components/brand";
@@ -8,12 +8,13 @@ import { GoogleMark } from "@/components/google-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getGoogleAuthorizationUrl, signInWithEmail } from "@/lib/api";
+import { getApiMisconfigurationMessage, isProductionApiMisconfigured } from "@/lib/api-base-url";
+import { apiBaseUrl, getGoogleAuthorizationUrl, signInWithEmail } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
 export function LoginScreen() {
   const router = useRouter();
-  const { acceptEmailAuth } = useAuth();
+  const { acceptEmailAuth, auth, isLoading, restoreError, clearRestoreError, workspaceSlug } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +22,18 @@ export function LoginScreen() {
   const [isGoogleRedirecting, setIsGoogleRedirecting] = useState(false);
 
   const appHref = (slug?: string | null) => slug ? `/app/workspace/${slug}/overview` : "/app/overview";
+
+  useEffect(() => {
+    if (!isLoading && auth) {
+      router.replace(appHref(workspaceSlug));
+    }
+  }, [auth, isLoading, router, workspaceSlug]);
+
+  useEffect(() => {
+    if (isProductionApiMisconfigured()) {
+      setError(getApiMisconfigurationMessage());
+    }
+  }, []);
 
   async function handleGoogleSignIn() {
     setError(null);
@@ -63,6 +76,9 @@ export function LoginScreen() {
           <div className="mb-8 text-center">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
             <p className="mt-2 text-sm text-muted-foreground">Enter your details to sign in</p>
+            {isLoading && !restoreError ? (
+              <p className="mt-3 text-xs text-muted-foreground">Restoring your session…</p>
+            ) : null}
           </div>
           <Button type="button" variant="outline" disabled={isGoogleRedirecting || isSubmitting} onClick={handleGoogleSignIn} className="mb-5 h-11 w-full rounded-xl text-base shadow-sm">
             <GoogleMark className="mr-2 h-4 w-4" />
@@ -76,6 +92,15 @@ export function LoginScreen() {
           <form onSubmit={handleSubmit} className="grid gap-5">
             <Input label="Email address" type="email" placeholder="name@company.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
             <Input label="Password" type="password" placeholder="••••••••" value={password} onChange={(event) => setPassword(event.target.value)} required />
+            {restoreError ? (
+              <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                <p>{restoreError}</p>
+                <p className="mt-2 text-xs opacity-80">API: {apiBaseUrl()}</p>
+                <button type="button" className="mt-2 underline" onClick={clearRestoreError}>
+                  Dismiss
+                </button>
+              </div>
+            ) : null}
             {error ? <p className="rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p> : null}
             <Button type="submit" disabled={isSubmitting} className="mt-2 h-11 w-full rounded-xl text-base shadow-sm">
               {isSubmitting ? "Signing in..." : "Sign in"}

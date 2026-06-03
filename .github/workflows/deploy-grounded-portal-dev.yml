@@ -25,7 +25,7 @@ jobs:
           script: |
             set -euo pipefail
 
-            APP_DIR="/app/grounded-portal-dev"
+            APP_DIR="$HOME/grounded-portal-dev"
             mkdir -p "$APP_DIR"
             cd "$APP_DIR"
 

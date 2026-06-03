@@ -205,11 +205,17 @@ export interface FeedbackSubmission {
 }
 
 export type WorkflowStepId =
-  | "init"
-  | "conversation_history"
-  | "check_retrieval"
-  | "research"
-  | "generate";
+  | "query_transformation"
+  | "semantic_chunking"
+  | "namespace_isolation"
+  | "hybrid_retrieval"
+  | "temporal_ranking"
+  | "reranking"
+  | "corrective_retrieval_behavior"
+  | "internal_retrieval_support"
+  | "verification_loop"
+  | "structured_enforcement"
+  | "source_attribution";
 
 export type WorkflowStepStatus = "idle" | "running" | "completed";
 

@@ -44,14 +44,35 @@ import { useApiQuery } from "@/lib/use-api-query";
 import { cn, formatDate } from "@/lib/utils";
 
 const STEP_LABELS: Record<WorkflowStepId, string> = {
-  init: "Initialize",
-  conversation_history: "Load Context",
-  check_retrieval: "Analyze Query",
-  research: "Retrieve Evidence",
-  generate: "Generate Answer",
+  query_transformation: "Query Transformation",
+  semantic_chunking: "Semantic Chunking",
+  namespace_isolation: "Namespace Isolation",
+  hybrid_retrieval: "Hybrid Retrieval",
+  temporal_ranking: "Temporal Ranking",
+  reranking: "Reranking",
+  corrective_retrieval_behavior: "Corrective Retrieval",
+  internal_retrieval_support: "Internal Retrieval Support",
+  verification_loop: "Verification Loop",
+  structured_enforcement: "Structured Enforcement",
+  source_attribution: "Source Attribution",
 };
 
-const STEP_ORDER: WorkflowStepId[] = ["init", "conversation_history", "check_retrieval", "research", "generate"];
+// Canonical execution order from the backend query service.
+// Structured enforcement wraps the verification/corrective/internal sub-paths,
+// so it starts before them and ends after them. Source attribution runs after.
+const STEP_ORDER: WorkflowStepId[] = [
+  "query_transformation",
+  "semantic_chunking",
+  "namespace_isolation",
+  "hybrid_retrieval",
+  "temporal_ranking",
+  "reranking",
+  "structured_enforcement",
+  "verification_loop",
+  "corrective_retrieval_behavior",
+  "internal_retrieval_support",
+  "source_attribution",
+];
 
 type LocalExchange =
   | {
@@ -134,13 +155,7 @@ function buildRunFromResponse(response: AgentChatResponse, query: string): Run {
 
 function stageLatenciesFromSteps(steps: WorkflowStep[]) {
   const byStep = new Map(steps.map((step) => [step.step, step.durationMs ?? 0]));
-  return {
-    conversation_history_ms: byStep.get("conversation_history") ?? 0,
-    check_retrieval_ms: byStep.get("check_retrieval") ?? 0,
-    retrieval_ms: byStep.get("research") ?? 0,
-    evidence_packaging_ms: 0,
-    answering_ms: byStep.get("generate") ?? 0,
-  };
+  return Object.fromEntries(STEP_ORDER.map((id) => [`${id}_ms`, byStep.get(id) ?? 0]));
 }
 
 function WorkflowStrip({ steps }: { steps: WorkflowStep[] }) {
@@ -175,12 +190,9 @@ function WorkflowStrip({ steps }: { steps: WorkflowStep[] }) {
 
 function QueryJourneyModal({ run, onClose }: { run: Run; onClose: () => void }) {
   const latencies = run.stage_latencies_ms ?? {};
-  const steps = [
-    { label: "Load Context", ms: latencies.conversation_history_ms ?? 0 },
-    { label: "Analyze Query", ms: latencies.check_retrieval_ms ?? 0 },
-    { label: "Retrieve Evidence", ms: (latencies.retrieval_ms ?? 0) + (latencies.evidence_packaging_ms ?? 0) },
-    { label: "Generate Answer", ms: latencies.answering_ms ?? 0 },
-  ].filter((step) => step.ms > 0);
+  const steps = STEP_ORDER
+    .map((id) => ({ label: STEP_LABELS[id], ms: latencies[`${id}_ms`] ?? 0 }))
+    .filter((step) => step.ms > 0);
   const total = steps.reduce((sum, step) => sum + step.ms, 0) || run.total_latency_ms || 1;
 
   useEffect(() => {

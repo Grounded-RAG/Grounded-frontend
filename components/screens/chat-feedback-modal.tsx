@@ -57,8 +57,14 @@ export function ChatFeedbackModal({
       <div className="glass w-full max-w-lg overflow-hidden rounded-[2rem] border border-border/30 bg-background/90 shadow-2xl" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-border/15 px-5 py-4">
           <div>
-            <p className="text-sm font-semibold text-foreground">Rate this answer</p>
-            <p className="text-xs text-muted-foreground">Your feedback is attached to this specific run.</p>
+            <p className="text-sm font-semibold text-foreground">
+              {rating === "negative" ? "What needs work?" : "Rate this answer"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {rating === "negative"
+                ? "Pick any issues that apply and add a note if you want."
+                : "Your feedback is attached to this specific run."}
+            </p>
           </div>
           <button type="button" onClick={onClose} className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-foreground/5 hover:text-foreground">
             <X className="h-4 w-4" />
@@ -71,7 +77,7 @@ export function ChatFeedbackModal({
           <div className="space-y-5 px-5 py-5">
             <textarea
               className="min-h-24 w-full resize-none rounded-2xl border border-border/25 bg-foreground/[0.02] px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 focus:border-foreground/20"
-              placeholder="What should be improved?"
+              placeholder="Optional note"
               value={freeformText}
               onChange={(event) => setFreeformText(event.target.value)}
             />

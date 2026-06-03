@@ -43,6 +43,7 @@ jobs:
           target: '/home/ubuntu/grounded-portal-dev'
           strip_components: 1
           overwrite: true
+          rm: true
 
       - name: SSH into Server and Deploy Grounded Portal
         uses: appleboy/ssh-action@v1.0.3

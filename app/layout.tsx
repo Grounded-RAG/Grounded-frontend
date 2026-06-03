@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/lib/auth";
+import { Providers } from "@/app/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,9 +16,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider>
-          <AuthProvider>{children}</AuthProvider>
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

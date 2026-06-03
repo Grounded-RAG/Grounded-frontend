@@ -1,86 +1,56 @@
-name: Deploy Grounded Dev Portal with Docker Compose
+- name: SSH into Server and Deploy Grounded Portal
+  uses: appleboy/ssh-action@v1.0.3
+  env:
+    NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+  with:
+    host: ${{ secrets.SERVER_HOST }}
+    username: ${{ secrets.SERVER_USER }}
+    key: ${{ secrets.SERVER_SSH_KEY }}
+    port: 22
+    command_timeout: 25m
+    timeout: 60s
+    envs: NEXT_PUBLIC_API_BASE_URL
+    script: |
+      set -euo pipefail
 
-on:
-  push:
-    branches: [refactor/clean-up]
+      APP_DIR="$HOME/grounded-portal-dev"
+      cd "$APP_DIR"
 
-jobs:
-  deploy-dev:
-    if: github.ref == 'refs/heads/refactor/clean-up'
-    runs-on: ubuntu-22.04
+      if [ -z "${NEXT_PUBLIC_API_BASE_URL:-}" ]; then
+        echo "Missing or empty required environment variable: NEXT_PUBLIC_API_BASE_URL" >&2
+        exit 1
+      fi
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      case "$NEXT_PUBLIC_API_BASE_URL" in
+        *localhost*|*127.0.0.1*)
+          echo "ERROR: NEXT_PUBLIC_API_BASE_URL must use the server's public backend URL, not localhost." >&2
+          echo "Example: http://51.20.18.111:8000" >&2
+          exit 1
+          ;;
+      esac
 
-      - name: Prepare deploy package
-        run: |
-          rm -rf deploy-package
-          mkdir -p deploy-package
+      {
+        echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
+        echo "API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
+      } > .env
 
-          rsync -a ./ deploy-package/ \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='.next' \
-            --exclude='out' \
-            --exclude='dist' \
-            --exclude='build' \
-            --exclude='coverage' \
-            --exclude='.turbo' \
-            --exclude='.cache' \
-            --exclude='deploy-package'
+      # Retry pulling the base image because Docker Hub sometimes times out
+      for i in 1 2 3; do
+        docker pull node:20-alpine && break
 
-          du -sh deploy-package
+        if [ "$i" -eq 3 ]; then
+          echo "Failed to pull node:20-alpine after 3 attempts" >&2
+          exit 1
+        fi
 
-      - name: Upload code to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
-          source: 'deploy-package/*'
-          target: '/home/ubuntu/grounded-portal-dev'
-          strip_components: 1
-          overwrite: true
-          rm: true
+        echo "Docker pull failed. Retrying in 10 seconds..."
+        sleep 10
+      done
 
-      - name: SSH into Server and Deploy Grounded Portal
-        uses: appleboy/ssh-action@v1.0.3
-        env:
-          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
-          command_timeout: 25m
-          timeout: 60s
-          envs: NEXT_PUBLIC_API_BASE_URL
-          script: |
-            set -euo pipefail
+      # Build first. Do not stop the old app until the new image builds successfully.
+      docker compose --progress=plain -f docker-compose.dev.yml build
 
-            APP_DIR="$HOME/grounded-portal-dev"
-            cd "$APP_DIR"
+      # Now recreate/update containers
+      docker compose -f docker-compose.dev.yml up -d --remove-orphans
 
-            if [ -z "${NEXT_PUBLIC_API_BASE_URL:-}" ]; then
-              echo "Missing or empty required environment variable: NEXT_PUBLIC_API_BASE_URL" >&2
-              exit 1
-            fi
-
-            case "$NEXT_PUBLIC_API_BASE_URL" in
-              *localhost*|*127.0.0.1*)
-                echo "ERROR: NEXT_PUBLIC_API_BASE_URL must use the server's public backend URL, not localhost." >&2
-                echo "Example: http://51.20.18.111:8000" >&2
-                exit 1
-                ;;
-            esac
-
-            {
-              echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
-              echo "API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
-            } > .env
-
-            docker compose -f docker-compose.dev.yml down || true
-            docker compose -f docker-compose.dev.yml build --no-cache --progress=plain
-            docker compose -f docker-compose.dev.yml up -d
+      docker compose -f docker-compose.dev.yml ps

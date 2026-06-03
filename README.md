@@ -101,13 +101,35 @@ Runs the configured Next.js lint command.
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `NEXT_PUBLIC_API_BASE_URL` | Yes | Base URL for the Grounded backend API. Defaults to `http://localhost:8000` in the API client if not set. |
+| `NEXT_PUBLIC_API_BASE_URL` | Yes | Base URL for the Grounded backend API. Baked into the client bundle at **build** time. |
+| `API_BASE_URL` | Production | Same URL as above, read at **container runtime** and injected into every page. Set this in Docker so API calls work without a rebuild. |
 
-Example:
+Example (local):
 
 ```bash
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+API_BASE_URL=http://localhost:8000
 ```
+
+### Production (Docker on a remote server)
+
+1. Set both variables to the **public** backend URL (not `localhost`):
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://YOUR_SERVER_IP:8000
+API_BASE_URL=http://YOUR_SERVER_IP:8000
+```
+
+2. On the backend, allow the frontend origin in `CORS_ALLOWED_ORIGINS` (e.g. `http://YOUR_SERVER_IP:3015`).
+
+3. Rebuild the frontend image after changing `NEXT_PUBLIC_API_BASE_URL`:
+
+```bash
+docker compose -f docker-compose.dev.yml build --no-cache
+docker compose -f docker-compose.dev.yml up -d
+```
+
+4. Open the app in an incognito window or clear site data if you previously tested with a bad API URL.
 
 ## Backend Expectations
 
@@ -241,7 +263,14 @@ The app did not find a valid API key or the saved API key failed backend validat
 
 ### Login or sign-up fails immediately
 
-Check that `NEXT_PUBLIC_API_BASE_URL` points to a running backend and that the backend supports the auth endpoints used by `lib/api.ts`.
+Check that `NEXT_PUBLIC_API_BASE_URL` and `API_BASE_URL` point to a running backend reachable from the browser (not `localhost` when the app is hosted on a remote IP). Confirm backend CORS includes your frontend origin.
+
+### Production shows "Loading", API errors, or "This page couldn't load"
+
+- Verify `docker exec grounded-portal-app-dev printenv API_BASE_URL` shows your public backend URL.
+- Rebuild with `--no-cache` after env changes.
+- Ensure port `8000` is open on the server firewall/security group.
+- Add `http://YOUR_SERVER_IP:3015` to backend `CORS_ALLOWED_ORIGINS`.
 
 ### Google sign-in returns an error
 

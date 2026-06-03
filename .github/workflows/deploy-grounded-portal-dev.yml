@@ -68,8 +68,19 @@ jobs:
               exit 1
             fi
 
-            echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL" > .env
+            case "$NEXT_PUBLIC_API_BASE_URL" in
+              *localhost*|*127.0.0.1*)
+                echo "ERROR: NEXT_PUBLIC_API_BASE_URL must use the server's public backend URL, not localhost." >&2
+                echo "Example: http://51.20.18.111:8000" >&2
+                exit 1
+                ;;
+            esac
+
+            {
+              echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
+              echo "API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
+            } > .env
 
             docker compose -f docker-compose.dev.yml down || true
-            docker compose -f docker-compose.dev.yml build --progress=plain
+            docker compose -f docker-compose.dev.yml build --no-cache --progress=plain
             docker compose -f docker-compose.dev.yml up -d

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Providers } from "@/app/providers";
+import { RuntimeConfigScript } from "@/components/runtime-config-script";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={poppins.variable} suppressHydrationWarning>
       <body className={`${poppins.className} antialiased`} suppressHydrationWarning>
+        <RuntimeConfigScript />
         <Providers>{children}</Providers>
       </body>
     </html>

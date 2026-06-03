@@ -8,6 +8,7 @@ import { GoogleMark } from "@/components/google-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getApiMisconfigurationMessage, isProductionApiMisconfigured } from "@/lib/api-base-url";
 import { apiBaseUrl, getGoogleAuthorizationUrl, signInWithEmail } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
@@ -27,6 +28,12 @@ export function LoginScreen() {
       router.replace(appHref(workspaceSlug));
     }
   }, [auth, isLoading, router, workspaceSlug]);
+
+  useEffect(() => {
+    if (isProductionApiMisconfigured()) {
+      setError(getApiMisconfigurationMessage());
+    }
+  }, []);
 
   async function handleGoogleSignIn() {
     setError(null);
@@ -56,14 +63,6 @@ export function LoginScreen() {
     }
   }
 
-  if (isLoading && !restoreError) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-background px-4">
-        <p className="text-sm text-muted-foreground">Checking session…</p>
-      </main>
-    );
-  }
-
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-background px-4 py-10 transition-colors duration-500">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -77,6 +76,9 @@ export function LoginScreen() {
           <div className="mb-8 text-center">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h1>
             <p className="mt-2 text-sm text-muted-foreground">Enter your details to sign in</p>
+            {isLoading && !restoreError ? (
+              <p className="mt-3 text-xs text-muted-foreground">Restoring your session…</p>
+            ) : null}
           </div>
           <Button type="button" variant="outline" disabled={isGoogleRedirecting || isSubmitting} onClick={handleGoogleSignIn} className="mb-5 h-11 w-full rounded-xl text-base shadow-sm">
             <GoogleMark className="mr-2 h-4 w-4" />
@@ -93,7 +95,7 @@ export function LoginScreen() {
             {restoreError ? (
               <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
                 <p>{restoreError}</p>
-                <p className="mt-2 text-xs opacity-80">API: {apiBaseUrl}</p>
+                <p className="mt-2 text-xs opacity-80">API: {apiBaseUrl()}</p>
                 <button type="button" className="mt-2 underline" onClick={clearRestoreError}>
                   Dismiss
                 </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { getApiMisconfigurationMessage, isProductionApiMisconfigured } from "@/lib/api-base-url";
 import { ApiError, authenticateWithApiKey, listWorkspaces } from "@/lib/api";
 import type { AuthSmokeResponse, EmailAuthResponse, Workspace } from "@/lib/types";
 
@@ -8,6 +9,7 @@ const API_KEY_STORAGE_KEY = "grounded_api_key";
 const WORKSPACE_ID_STORAGE_KEY = "grounded_workspace_id";
 const WORKSPACE_NAME_STORAGE_KEY = "grounded_workspace_name";
 const WORKSPACE_SLUG_STORAGE_KEY = "grounded_workspace_slug";
+const RESTORE_TIMEOUT_MS = 15_000;
 
 function readStorage(key: string) {
   if (typeof window === "undefined") return null;
@@ -74,16 +76,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [workspaceName, setWorkspaceName] = useState<string | null>(null);
   const [workspaceSlug, setWorkspaceSlug] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [restoreError, setRestoreError] = useState<string | null>(null);
 
   useEffect(() => {
-    setApiKey(readStorage(API_KEY_STORAGE_KEY));
+    const storedKey = readStorage(API_KEY_STORAGE_KEY);
+    setApiKey(storedKey);
     setWorkspaceId(readStorage(WORKSPACE_ID_STORAGE_KEY));
     setWorkspaceName(readStorage(WORKSPACE_NAME_STORAGE_KEY));
     setWorkspaceSlug(readStorage(WORKSPACE_SLUG_STORAGE_KEY));
     setHydrated(true);
+    if (storedKey) setIsLoading(true);
   }, []);
+
+  useEffect(() => {
+    if (hydrated) return;
+    const timeout = window.setTimeout(() => setHydrated(true), 2_000);
+    return () => window.clearTimeout(timeout);
+  }, [hydrated]);
 
   const setWorkspace = useCallback((nextWorkspaceId: string | null, nextWorkspaceName?: string | null, nextWorkspaceSlug?: string | null) => {
     setWorkspaceId(nextWorkspaceId);
@@ -116,20 +126,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRestoreError(null);
         return;
       }
+      if (isProductionApiMisconfigured()) {
+        setRestoreError(getApiMisconfigurationMessage());
+        setIsLoading(false);
+        return;
+      }
       setIsLoading(true);
       setRestoreError(null);
       try {
-        const authenticated = await authenticateWithApiKey(apiKey);
-        if (cancelled) return;
-        setAuth(authenticated);
-        const rows = await listWorkspaces(apiKey);
-        if (cancelled) return;
-        setWorkspaces(rows);
-        const storedWorkspaceId = readStorage(WORKSPACE_ID_STORAGE_KEY);
-        const selected = rows.find((workspace) => workspace.workspace_id === storedWorkspaceId) ?? rows[0];
-        if (selected) {
-          setWorkspace(selected.workspace_id, selected.name, selected.slug);
-        }
+        const restoreWork = async () => {
+          const authenticated = await authenticateWithApiKey(apiKey);
+          if (cancelled) return;
+          setAuth(authenticated);
+          const rows = await listWorkspaces(apiKey);
+          if (cancelled) return;
+          setWorkspaces(rows);
+          const storedWorkspaceId = readStorage(WORKSPACE_ID_STORAGE_KEY);
+          const selected = rows.find((workspace) => workspace.workspace_id === storedWorkspaceId) ?? rows[0];
+          if (selected) {
+            setWorkspace(selected.workspace_id, selected.name, selected.slug);
+          }
+        };
+        const timeout = new Promise<never>((_, reject) => {
+          window.setTimeout(() => reject(new Error("Session restore timed out. Sign in again.")), RESTORE_TIMEOUT_MS);
+        });
+        await Promise.race([restoreWork(), timeout]);
       } catch (error) {
         if (!cancelled) {
           const message = error instanceof ApiError
@@ -188,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(() => ({
     apiKey,
     auth,
-    isLoading: !hydrated || isLoading,
+    isLoading: hydrated && isLoading,
     restoreError,
     workspaces,
     workspaceId,

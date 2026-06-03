@@ -114,7 +114,7 @@ export function AppShell({
               <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Could not reach the API</p>
               <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">{restoreError}</p>
               <p className="mt-3 text-xs text-zinc-400">
-                API base URL: <code className="text-zinc-600 dark:text-zinc-300">{apiBaseUrl}</code>
+                API base URL: <code className="text-zinc-600 dark:text-zinc-300">{apiBaseUrl()}</code>
               </p>
               <p className="mt-3 text-xs text-zinc-400">
                 Set <code className="text-zinc-600 dark:text-zinc-300">NEXT_PUBLIC_API_BASE_URL</code> to your server backend (not localhost), then rebuild the frontend container.

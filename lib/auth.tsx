@@ -37,6 +37,31 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+const missingProviderMessage = "useAuth must be used within AuthProvider";
+
+function createUnauthenticatedAuth(): AuthContextValue {
+  const noop = () => undefined;
+  const asyncEmpty = async () => [] as Workspace[];
+  const asyncReject = async () => {
+    throw new Error(missingProviderMessage);
+  };
+
+  return {
+    apiKey: null,
+    auth: null,
+    isLoading: false,
+    workspaces: [],
+    workspaceId: null,
+    workspaceName: null,
+    workspaceSlug: null,
+    signInWithApiKey: asyncReject,
+    acceptEmailAuth: noop,
+    refreshWorkspaces: asyncEmpty,
+    setWorkspace: noop,
+    signOut: noop,
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [apiKey, setApiKey] = useState<string | null>(() => readStorage(API_KEY_STORAGE_KEY));
   const [auth, setAuth] = useState<AuthSmokeResponse | null>(null);
@@ -148,6 +173,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const value = useContext(AuthContext);
-  if (!value) throw new Error("useAuth must be used within AuthProvider");
-  return value;
+  if (value) return value;
+  if (typeof window === "undefined") {
+    return createUnauthenticatedAuth();
+  }
+
+  throw new Error(missingProviderMessage);
 }

@@ -20,14 +20,14 @@ import { cn } from "@/lib/utils";
 
 /* ─── Sidebar sections ─── */
 const SECTIONS = [
-  { id: "intro",        label: "What is Grounded?" },
-  { id: "concepts",     label: "Core Concepts" },
-  { id: "quickstart",   label: "Quick Start" },
-  { id: "modes",        label: "Execution Modes" },
-  { id: "pipeline",     label: "Pipeline Architecture" },
-  { id: "api",          label: "Using the API" },
-  { id: "trust",        label: "Trust & Citations" },
-  { id: "faq",          label: "FAQ" },
+  { id: "intro", label: "What is Grounded?" },
+  { id: "concepts", label: "Core Concepts" },
+  { id: "quickstart", label: "Quick Start" },
+  { id: "modes", label: "Execution Modes" },
+  { id: "pipeline", label: "Pipeline Architecture" },
+  { id: "api", label: "Using the API" },
+  { id: "trust", label: "Trust & Citations" },
+  { id: "faq", label: "FAQ" },
 ];
 
 function SectionAnchor({ id }: { id: string }) {
@@ -48,8 +48,8 @@ function P({ children, className }: { children: React.ReactNode; className?: str
 
 function InfoBox({ children, tone = "blue" }: { children: React.ReactNode; tone?: "blue" | "amber" | "emerald" }) {
   const styles = {
-    blue:    "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800/40 dark:bg-blue-950/30 dark:text-blue-300",
-    amber:   "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300",
+    blue: "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800/40 dark:bg-blue-950/30 dark:text-blue-300",
+    amber: "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300",
     emerald: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/40 dark:bg-emerald-950/30 dark:text-emerald-300",
   };
   return (
@@ -304,7 +304,7 @@ export function DocsScreen() {
         <SectionAnchor id="api" />
         <H2>Using the API</H2>
         <P>
-          Grounded exposes a REST API at <Code>http://localhost:8000</Code>. All endpoints require an <Code>X-API-Key</Code> header. Get your key from <strong>Developer → API Keys</strong>.
+          Grounded exposes a REST API at <Code>http://51.20.18.111:8000</Code>. All endpoints require an <Code>X-API-Key</Code> header. Get your key from <strong>Developer → API Keys</strong>.
         </P>
 
         <H3>Authentication</H3>

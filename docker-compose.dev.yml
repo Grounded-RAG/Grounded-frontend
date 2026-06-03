@@ -1,0 +1,23 @@
+services:
+  grounded-portal-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+    container_name: grounded-portal-app-dev
+    ports:
+      - "3015:3015"
+    environment:
+      - NODE_ENV=production
+      - PORT=3015
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - grounded-portal-network-dev
+
+networks:
+  grounded-portal-network-dev:
+    driver: bridge

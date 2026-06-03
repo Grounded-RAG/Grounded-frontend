@@ -29,26 +29,26 @@ const NAV_GROUPS = [
   {
     label: "Workspace",
     items: [
-      { label: "Overview",  icon: LayoutDashboard, path: "/overview" },
-      { label: "Datasets",  icon: Database,        path: "/datasets" },
-      { label: "Agents",    icon: Bot,             path: "/agents" },
-      { label: "Runs",      icon: Activity,        path: "/runs" },
+      { label: "Overview", icon: LayoutDashboard, path: "/overview" },
+      { label: "Datasets", icon: Database, path: "/datasets" },
+      { label: "Agents", icon: Bot, path: "/agents" },
+      { label: "Runs", icon: Activity, path: "/runs" },
     ],
   },
   {
     label: "Admin",
     items: [
-      { label: "Usage",      icon: Activity,          path: "/usage" },
-      { label: "Feedback",   icon: MessageSquareText,  path: "/feedback" },
-      { label: "Governance", icon: Shield,             path: "/governance" },
-      { label: "Settings",   icon: Settings,           path: "/settings" },
+      { label: "Usage", icon: Activity, path: "/usage" },
+      { label: "Feedback", icon: MessageSquareText, path: "/feedback" },
+      { label: "Governance", icon: Shield, path: "/governance" },
+      { label: "Settings", icon: Settings, path: "/settings" },
     ],
   },
   {
     label: "Developer",
     items: [
-      { label: "API Keys",      icon: KeyRound, path: "/api-keys" },
-      { label: "API Reference", icon: Code2,    path: "/api-reference" },
+      { label: "API Keys", icon: KeyRound, path: "/api-keys" },
+      { label: "API Reference", icon: Code2, path: "/api-reference" },
       { label: "Documentation", icon: BookOpen, path: "/docs" },
     ],
   },

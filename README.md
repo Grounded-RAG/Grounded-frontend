@@ -85,18 +85,27 @@ Runs the configured Next.js lint command.
 
 ## API URL (no Vercel env vars required)
 
-The backend URL is set in `lib/api-base-url.ts`:
-
-| Environment | API base URL |
+| Environment | How the frontend calls the API |
 | --- | --- |
-| Local `npm run dev` | `http://localhost:8000` |
-| Production / Vercel | `http://51.20.18.111:8000` |
+| Local `npm run dev` | Direct: `http://localhost:8000` |
+| Vercel (HTTPS) | Same-origin `/v1/...` proxied to `http://51.20.18.111:8000` via `next.config.js` rewrites |
 
-On the backend, add your Vercel URL to `CORS_ALLOWED_ORIGINS`, for example:
+This avoids browser **mixed-content** blocks (HTTPS page cannot call HTTP API directly).
+
+**Backend `CORS_ALLOWED_ORIGINS`** — add your Vercel URL for Google OAuth / any direct browser calls:
 
 ```text
-https://grounded-rag.vercel.app
+https://grounded-rag-three.vercel.app
 ```
+
+On the server `.env`:
+
+```bash
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,https://grounded-rag-three.vercel.app
+FRONTEND_URL=https://grounded-rag-three.vercel.app
+```
+
+Restart the backend after changing `.env`.
 
 ## Backend Expectations
 

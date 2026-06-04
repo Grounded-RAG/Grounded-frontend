@@ -1,4 +1,4 @@
-const PRODUCTION_API_BASE_URL = "http://51.20.18.111:8000";
+const BACKEND_ORIGIN = "http://51.20.18.111:8000";
 const LOCAL_API_BASE_URL = "http://localhost:8000";
 
 function normalizeBaseUrl(url: string): string {
@@ -9,25 +9,40 @@ function isLocalFrontendHost(hostname: string): boolean {
   return /localhost|127\.0\.0\.1/i.test(hostname);
 }
 
-/** Server-only: injected into the page for browser API calls. */
+/**
+ * Browser API base URL.
+ * On Vercel (HTTPS), use same-origin `/v1/...` proxied by next.config rewrites (avoids mixed-content block).
+ * Locally, call the backend directly.
+ */
+export function getApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    const injected = window.__GROUNDED_API_BASE_URL__;
+    if (typeof injected === "string") {
+      return normalizeBaseUrl(injected);
+    }
+    if (isLocalFrontendHost(window.location.hostname)) {
+      return LOCAL_API_BASE_URL;
+    }
+    return "";
+  }
+  if (process.env.NODE_ENV === "development") {
+    return LOCAL_API_BASE_URL;
+  }
+  if (process.env.VERCEL) {
+    return "";
+  }
+  return BACKEND_ORIGIN;
+}
+
+/** Injected into HTML for client hydration (must match getApiBaseUrl() in the browser). */
 export function getServerApiBaseUrl(): string {
   if (process.env.NODE_ENV === "development") {
     return LOCAL_API_BASE_URL;
   }
-  return PRODUCTION_API_BASE_URL;
-}
-
-export function getApiBaseUrl(): string {
-  if (typeof window !== "undefined") {
-    const injected = window.__GROUNDED_API_BASE_URL__;
-    if (typeof injected === "string" && injected.length > 0) {
-      return normalizeBaseUrl(injected);
-    }
-    return isLocalFrontendHost(window.location.hostname)
-      ? LOCAL_API_BASE_URL
-      : PRODUCTION_API_BASE_URL;
+  if (process.env.VERCEL) {
+    return "";
   }
-  return getServerApiBaseUrl();
+  return BACKEND_ORIGIN;
 }
 
 export function isProductionApiMisconfigured(): boolean {

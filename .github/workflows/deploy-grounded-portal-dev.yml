@@ -11,46 +11,101 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: SSH into Server and Deploy Grounded Portal
-        uses: appleboy/ssh-action@v0.1.10
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
-          command_timeout: 25m
-          timeout: 60s
+          command_timeout: 30m
+          timeout: 30m
+          envs: NEXT_PUBLIC_API_BASE_URL
           script: |
             set -euo pipefail
 
             APP_DIR="$HOME/grounded-portal-dev"
-            mkdir -p "$APP_DIR"
-            cd "$APP_DIR"
+            REPO_URL="git@github.com:Grounded-RAG/Grounded-frontend.git"
+            BRANCH="refactor/clean-up"
 
-            # avoid first-time GitHub host prompt
+            mkdir -p "$APP_DIR"
+
+            # Avoid first-time GitHub host prompt
             mkdir -p "$HOME/.ssh"
             touch "$HOME/.ssh/known_hosts"
             grep -q github.com "$HOME/.ssh/known_hosts" || ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts"
 
-            # clone OR pull in one command
-            if [ ! -d ".git" ]; then git clone -b refactor/clean-up git@github.com:Grounded-RAG/Grounded-frontend.git .; else git pull origin refactor/clean-up; fi
+            # Clone fresh if folder is not a git repo.
+            # If it is already a git repo, reset it cleanly to the branch.
+            if [ ! -d "$APP_DIR/.git" ]; then
+              echo "Directory exists but is not a git repo. Cleaning before clone..."
+              find "$APP_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+              git clone -b "$BRANCH" "$REPO_URL" "$APP_DIR"
+            else
+              echo "Existing git repo found. Pulling latest code..."
+              cd "$APP_DIR"
+              git fetch origin "$BRANCH"
+              git reset --hard "origin/$BRANCH"
+              git clean -fd
+            fi
 
-            # build stamp
+            cd "$APP_DIR"
+
+            if [ -z "${NEXT_PUBLIC_API_BASE_URL:-}" ]; then
+              echo "Missing or empty required environment variable: NEXT_PUBLIC_API_BASE_URL" >&2
+              exit 1
+            fi
+
+            case "$NEXT_PUBLIC_API_BASE_URL" in
+              *localhost*|*127.0.0.1*)
+                echo "ERROR: NEXT_PUBLIC_API_BASE_URL must use the server's public backend URL, not localhost." >&2
+                echo "Example: http://51.20.18.111:8000" >&2
+                exit 1
+                ;;
+            esac
+
+            # Build stamp
             mkdir -p build/web
             date +%s > build/web/version.json
 
             # Recreate .env file
             cat <<EOF > .env
-            NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
-            API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
-
+            NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+            API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
             EOF
 
-            # docker compose v2
-            docker compose -f docker-compose.dev.yml down || true
-            docker image prune -f || true
+            echo "Checking Docker..."
+            docker --version
+            docker compose version
+
+            echo "Pulling base image with retries..."
+            for i in 1 2 3; do
+              if docker pull node:20-alpine; then
+                echo "Successfully pulled node:20-alpine"
+                break
+              fi
+
+              if [ "$i" -eq 3 ]; then
+                echo "Failed to pull node:20-alpine after 3 attempts" >&2
+                exit 1
+              fi
+
+              echo "Docker pull failed. Retrying in 10 seconds..."
+              sleep 10
+            done
+
+            echo "Cleaning safe Docker build cache..."
             docker builder prune -f || true
-            docker compose -f docker-compose.dev.yml build
-            docker compose -f docker-compose.dev.yml up -d
+
+            echo "Building Docker image..."
+            docker compose --progress=plain -f docker-compose.dev.yml build
+
+            echo "Starting updated containers..."
+            docker compose -f docker-compose.dev.yml up -d --remove-orphans
+
+            echo "Current container status:"
+            docker compose -f docker-compose.dev.yml ps

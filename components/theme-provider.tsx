@@ -9,7 +9,12 @@ interface ThemeContextValue {
   setTheme: (theme: Theme) => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue | null>(null);
+const defaultThemeContext: ThemeContextValue = {
+  theme: "dark",
+  setTheme: () => undefined,
+};
+
+const ThemeContext = createContext<ThemeContextValue>(defaultThemeContext);
 const STORAGE_KEY = "grounded_theme";
 
 function applyTheme(theme: Theme) {
@@ -42,7 +47,5 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAppTheme() {
-  const value = useContext(ThemeContext);
-  if (!value) throw new Error("useAppTheme must be used within ThemeProvider");
-  return value;
+  return useContext(ThemeContext);
 }

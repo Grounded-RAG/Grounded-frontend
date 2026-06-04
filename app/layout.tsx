@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Providers } from "@/app/providers";
 import { RuntimeConfigScript } from "@/components/runtime-config-script";
+import { getAppUrl } from "@/lib/app-url";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -12,6 +13,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getAppUrl()),
   title: "Grounded — Document-backed intelligence",
   description: "Upload your knowledge, create grounded agents, ask questions with citations and confidence scoring. Enterprise document intelligence for teams.",
   icons: {

@@ -275,13 +275,26 @@ Check that `NEXT_PUBLIC_API_BASE_URL` and `API_BASE_URL` point to a running back
 
 1. Push this repo to GitHub (`Grounded-RAG/Grounded-frontend`).
 2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import the repository.
-3. Framework preset: **Next.js** (auto-detected). Root directory: repository root.
-4. Add environment variables:
-   - `NEXT_PUBLIC_API_BASE_URL` = `http://51.20.18.111:8000` (or your backend URL)
-   - `API_BASE_URL` = same value
-5. Click **Deploy**.
+3. Set the Vercel **project name** to `grounded-rag` (URL will be `https://grounded-rag.vercel.app`).
+4. Framework preset: **Next.js** (auto-detected). Root directory: repository root.
+5. Add environment variables (Production + Preview):
+
+| Variable | Example value |
+| --- | --- |
+| `NEXT_PUBLIC_API_BASE_URL` | `http://51.20.18.111:8000` |
+| `API_BASE_URL` | `http://51.20.18.111:8000` |
+| `NEXT_PUBLIC_APP_URL` | `https://grounded-rag.vercel.app` |
+
+6. Click **Deploy**.
 
 Optional: connect branch `refactor/clean-up` (or `main`) for automatic deploys on push.
+
+CLI (after `npx vercel login`):
+
+```bash
+npx vercel link --project grounded-rag
+npx vercel --prod
+```
 
 **Google OAuth:** add your Vercel callback URL to Google and the backend, e.g.:
 

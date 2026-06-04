@@ -35,7 +35,8 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-RUN test -n "$(find .next/static/css -name '*.css' -print -quit 2>/dev/null)" \
+RUN CSS_COUNT="$(find .next/static/css -name '*.css' 2>/dev/null | wc -l | tr -d ' ')" \
+  && test "${CSS_COUNT:-0}" -gt 0 \
   || (echo "ERROR: next build did not produce .next/static/css/*.css" >&2 && exit 1)
 
 # Production image, copy all the files and run next

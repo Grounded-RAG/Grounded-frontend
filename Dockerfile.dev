@@ -36,9 +36,12 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-# Fail the image build early if Tailwind/CSS was not emitted (unstyled production UI).
-RUN test -n "$(find .next/static/css -name '*.css' -print -quit 2>/dev/null)" \
-  || (echo "ERROR: next build did not produce .next/static/css/*.css" >&2 && exit 1)
+# Fail early if Tailwind/CSS was not emitted (use wc/l, not find -quit — not on Alpine busybox).
+RUN CSS_COUNT="$(find .next/static/css -name '*.css' 2>/dev/null | wc -l | tr -d ' ')" \
+  && test "${CSS_COUNT:-0}" -gt 0 \
+  || (echo "ERROR: next build did not produce .next/static/css/*.css" >&2 \
+      && ls -la .next/static 2>&1 || true \
+      && exit 1)
 
 # Production image, copy all the files and run next
 FROM base AS runner

@@ -45,27 +45,13 @@ The public landing, login, and sign-up pages can render without the backend. Aut
 npm install
 ```
 
-2. Create a local environment file:
-
-```bash
-cp .env.example .env.local
-```
-
-3. Set the backend API URL in `.env.local`:
-
-```bash
-NEXT_PUBLIC_API_BASE_URL=<backend-URL>
-```
-
-Use the real backend URL if the API is running somewhere other than `localhost:8000`.
-
-4. Start the development server:
+2. Start the development server (API URL is automatic — see `lib/api-base-url.ts`):
 
 ```bash
 npm run dev
 ```
 
-5. Open the app:
+4. Open the app:
 
 ```text
 http://localhost:3000
@@ -97,38 +83,20 @@ npm run lint
 
 Runs the configured Next.js lint command.
 
-## Environment Variables
+## API URL (no Vercel env vars required)
 
-| Variable | Required | Description |
-| --- | --- | --- |
-| `NEXT_PUBLIC_API_BASE_URL` | Yes | Base URL for the Grounded backend API (client + build). |
-| `API_BASE_URL` | Production | Same URL as above, read on the **server** and injected into every page at runtime (Vercel env var). |
+The backend URL is set in `lib/api-base-url.ts`:
 
-Example (local):
-
-```bash
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
-API_BASE_URL=http://localhost:8000
-```
-
-### Production (Vercel)
-
-Set both variables in **Vercel → Project → Settings → Environment Variables** (Production, Preview, and Development as needed):
-
-```bash
-NEXT_PUBLIC_API_BASE_URL=http://YOUR_SERVER_IP:8000
-API_BASE_URL=http://YOUR_SERVER_IP:8000
-```
-
-Use your public backend URL, not `localhost`.
+| Environment | API base URL |
+| --- | --- |
+| Local `npm run dev` | `http://localhost:8000` |
+| Production / Vercel | `http://51.20.18.111:8000` |
 
 On the backend, add your Vercel URL to `CORS_ALLOWED_ORIGINS`, for example:
 
 ```text
-https://your-app.vercel.app
+https://grounded-rag.vercel.app
 ```
-
-Redeploy on Vercel after changing environment variables.
 
 ## Backend Expectations
 
@@ -262,14 +230,13 @@ The app did not find a valid API key or the saved API key failed backend validat
 
 ### Login or sign-up fails immediately
 
-Check that `NEXT_PUBLIC_API_BASE_URL` and `API_BASE_URL` point to a running backend reachable from the browser (not `localhost` when the app is hosted on a remote IP). Confirm backend CORS includes your frontend origin.
+Confirm the backend at `http://51.20.18.111:8000` is running and CORS includes your frontend origin (e.g. `https://grounded-rag.vercel.app`).
 
-### Production shows API errors or misconfiguration on Vercel
+### Production shows API errors on Vercel
 
-- Confirm `NEXT_PUBLIC_API_BASE_URL` and `API_BASE_URL` are set in Vercel (same public backend URL).
-- Redeploy after changing env vars.
-- Add your `https://*.vercel.app` origin to backend `CORS_ALLOWED_ORIGINS`.
-- Ensure port `8000` on the backend is reachable from the public internet.
+- Ensure `http://51.20.18.111:8000` is reachable from the browser.
+- Add your Vercel URL to backend `CORS_ALLOWED_ORIGINS`.
+- Ensure port `8000` is open on the server firewall.
 
 ## Deploying with Vercel
 
@@ -277,15 +244,9 @@ Check that `NEXT_PUBLIC_API_BASE_URL` and `API_BASE_URL` point to a running back
 2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import the repository.
 3. Set the Vercel **project name** to `grounded-rag` (URL will be `https://grounded-rag.vercel.app`).
 4. Framework preset: **Next.js** (auto-detected). Root directory: repository root.
-5. Add environment variables (Production + Preview):
+5. Click **Deploy** (no environment variables required — API URL is hardcoded).
 
-| Variable | Example value |
-| --- | --- |
-| `NEXT_PUBLIC_API_BASE_URL` | `http://51.20.18.111:8000` |
-| `API_BASE_URL` | `http://51.20.18.111:8000` |
-| `NEXT_PUBLIC_APP_URL` | `https://grounded-rag.vercel.app` |
-
-6. Click **Deploy**.
+6. Add `https://grounded-rag.vercel.app` to backend `CORS_ALLOWED_ORIGINS`.
 
 Optional: connect branch `refactor/clean-up` (or `main`) for automatic deploys on push.
 

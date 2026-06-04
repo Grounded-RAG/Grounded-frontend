@@ -187,7 +187,7 @@ export function AppShell({
                 API base URL: <code className="text-foreground/80">{apiBaseUrl()}</code>
               </p>
               <p className="mt-3 text-xs text-muted-foreground/80">
-                Set <code className="text-foreground/80">NEXT_PUBLIC_API_BASE_URL</code> to your server backend (not localhost), then rebuild the frontend container.
+                Ensure the backend at <code className="text-foreground/80">http://51.20.18.111:8000</code> is running and allows this site in CORS.
               </p>
               <button
                 type="button"

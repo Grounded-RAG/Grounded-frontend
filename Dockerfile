@@ -9,8 +9,9 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* pnpm-lock.yaml* ./
+ENV NODE_ENV=development
 RUN \
-  if [ -f package-lock.json ]; then npm ci --legacy-peer-deps; \
+  if [ -f package-lock.json ]; then npm ci --legacy-peer-deps --include=dev; \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --no-frozen-lockfile; \
   else echo "Lockfile not found." && exit 1; \
   fi
@@ -35,9 +36,9 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
-RUN CSS_COUNT="$(find .next/static/css -name '*.css' 2>/dev/null | wc -l | tr -d ' ')" \
+RUN CSS_COUNT="$(find .next/static -name '*.css' 2>/dev/null | wc -l | tr -d ' ')" \
   && test "${CSS_COUNT:-0}" -gt 0 \
-  || (echo "ERROR: next build did not produce .next/static/css/*.css" >&2 && exit 1)
+  || (echo "ERROR: next build did not produce any .css under .next/static" >&2 && exit 1)
 
 # Production image, copy all the files and run next
 FROM base AS runner

@@ -81,6 +81,12 @@ jobs:
               echo "API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
             } > .env
 
+            echo "Removing stale local build artifacts..."
+            rm -rf .next out dist build coverage .turbo .cache
+
+            echo "Stopping old containers..."
+            docker compose -f docker-compose.dev.yml down --remove-orphans || true
+
             echo "Checking Docker..."
             docker --version
             docker compose version
@@ -101,8 +107,8 @@ jobs:
               sleep 10
             done
 
-            echo "Building Docker image..."
-            docker compose --progress=plain -f docker-compose.dev.yml build
+            echo "Building Docker image from scratch (no cache)..."
+            docker compose --progress=plain -f docker-compose.dev.yml build --no-cache
 
             echo "Starting updated containers..."
             docker compose -f docker-compose.dev.yml up -d --remove-orphans

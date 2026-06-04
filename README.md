@@ -265,12 +265,43 @@ The app did not find a valid API key or the saved API key failed backend validat
 
 Check that `NEXT_PUBLIC_API_BASE_URL` and `API_BASE_URL` point to a running backend reachable from the browser (not `localhost` when the app is hosted on a remote IP). Confirm backend CORS includes your frontend origin.
 
+### Production page has no CSS / looks like plain HTML
+
+Production serves prebuilt files from `/_next/static/css/`. If those files are missing, the UI is unstyled even though class names exist in the HTML.
+
+- Confirm the deploy workflow finished and `verify-deploy-health.sh` passed.
+- On the server: `docker exec grounded-portal-app-dev ls .next/static/css` should list at least one `.css` file.
+- `curl -s http://127.0.0.1:3015/login | grep stylesheet` should return a `<link rel="stylesheet" ...>` line.
+- Rebuild with `docker compose -f docker-compose.dev.yml build --no-cache` after code or env changes.
+
 ### Production shows "Loading", API errors, or "This page couldn't load"
 
-- Verify `docker exec grounded-portal-app-dev printenv API_BASE_URL` shows your public backend URL.
+- Verify `docker exec grounded-portal-app-dev printenv API_BASE_URL` shows your public backend URL (not empty, not `localhost`).
+- Ensure `.env` on the server has no leading spaces before variable names.
 - Rebuild with `--no-cache` after env changes.
 - Ensure port `8000` is open on the server firewall/security group.
 - Add `http://YOUR_SERVER_IP:3015` to backend `CORS_ALLOWED_ORIGINS`.
+
+## Deploying to the dev server (GitHub Actions)
+
+Pushes to `refactor/clean-up` run `.github/workflows/deploy-grounded-portal-dev.yml`.
+
+**Required GitHub repository secrets:**
+
+| Secret | Example | Purpose |
+|--------|---------|---------|
+| `SERVER_HOST` | `51.20.18.111` | SSH target |
+| `SERVER_USER` | `ubuntu` | SSH user |
+| `SERVER_SSH_KEY` | private key | SSH auth |
+| `NEXT_PUBLIC_API_BASE_URL` | `http://51.20.18.111:8000` | Backend URL for build + runtime |
+
+**Server requirements:**
+
+- SSH access to `git@github.com:Grounded-RAG/Grounded-frontend.git` (deploy key on the server).
+- Docker and Docker Compose v2 installed.
+- Port `3015` open for the frontend.
+
+The workflow writes a valid `.env`, builds with `--no-cache`, starts the container, and runs `scripts/verify-deploy-health.sh` so a broken deploy (missing CSS or localhost API URL) fails before you rely on it.
 
 ### Google sign-in returns an error
 

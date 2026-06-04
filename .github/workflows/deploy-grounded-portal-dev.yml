@@ -23,7 +23,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           command_timeout: 30m
-          timeout: 30m
+          timeout: 30s
           envs: NEXT_PUBLIC_API_BASE_URL
           script: |
             set -euo pipefail
@@ -31,22 +31,22 @@ jobs:
             APP_DIR="$HOME/grounded-portal-dev"
             REPO_URL="git@github.com:Grounded-RAG/Grounded-frontend.git"
             BRANCH="refactor/clean-up"
+            COMPOSE_FILE="docker-compose.dev.yml"
+            CONTAINER="grounded-portal-app-dev"
+            APP_PORT="3015"
 
             mkdir -p "$APP_DIR"
 
-            # Avoid first-time GitHub host prompt
             mkdir -p "$HOME/.ssh"
             touch "$HOME/.ssh/known_hosts"
             grep -q github.com "$HOME/.ssh/known_hosts" || ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts"
 
-            # Clone fresh if folder is not a git repo.
-            # If it is already a git repo, reset it cleanly to the branch.
             if [ ! -d "$APP_DIR/.git" ]; then
               echo "Directory exists but is not a git repo. Cleaning before clone..."
               find "$APP_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
               git clone -b "$BRANCH" "$REPO_URL" "$APP_DIR"
             else
-              echo "Existing git repo found. Pulling latest code..."
+              echo "Existing git repo found. Syncing to latest $BRANCH..."
               cd "$APP_DIR"
               git fetch origin "$BRANCH"
               git reset --hard "origin/$BRANCH"
@@ -56,56 +56,59 @@ jobs:
             cd "$APP_DIR"
 
             if [ -z "${NEXT_PUBLIC_API_BASE_URL:-}" ]; then
-              echo "Missing or empty required environment variable: NEXT_PUBLIC_API_BASE_URL" >&2
+              echo "Missing GitHub secret: NEXT_PUBLIC_API_BASE_URL" >&2
+              echo "Set it to your public backend URL, e.g. http://51.20.18.111:8000" >&2
               exit 1
             fi
 
             case "$NEXT_PUBLIC_API_BASE_URL" in
               *localhost*|*127.0.0.1*)
-                echo "ERROR: NEXT_PUBLIC_API_BASE_URL must use the server's public backend URL, not localhost." >&2
-                echo "Example: http://51.20.18.111:8000" >&2
+                echo "ERROR: NEXT_PUBLIC_API_BASE_URL must not use localhost for remote deploy." >&2
                 exit 1
                 ;;
             esac
 
-            # Build stamp
             mkdir -p build/web
             date +%s > build/web/version.json
 
-            # Recreate .env file
-            cat <<EOF > .env
-            NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
-            API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
-            EOF
+            # No leading spaces — docker compose will not read indented variable names.
+            printf 'NEXT_PUBLIC_API_BASE_URL=%s\nAPI_BASE_URL=%s\n' \
+              "$NEXT_PUBLIC_API_BASE_URL" "$NEXT_PUBLIC_API_BASE_URL" > .env
 
-            echo "Checking Docker..."
+            echo "Wrote .env:"
+            cat .env
+
+            chmod +x scripts/validate-production-env.sh scripts/verify-deploy-health.sh
+            export NEXT_PUBLIC_API_BASE_URL API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL"
+            ./scripts/validate-production-env.sh
+
             docker --version
             docker compose version
 
-            echo "Pulling base image with retries..."
-            for i in 1 2 3; do
-              if docker pull node:20-alpine; then
-                echo "Successfully pulled node:20-alpine"
-                break
-              fi
-
-              if [ "$i" -eq 3 ]; then
-                echo "Failed to pull node:20-alpine after 3 attempts" >&2
-                exit 1
-              fi
-
-              echo "Docker pull failed. Retrying in 10 seconds..."
-              sleep 10
-            done
-
-            echo "Cleaning safe Docker build cache..."
+            docker compose -f "$COMPOSE_FILE" down --remove-orphans || true
+            docker image prune -f || true
             docker builder prune -f || true
 
-            echo "Building Docker image..."
-            docker compose --progress=plain -f docker-compose.dev.yml build
+            echo "Building image (no cache so CSS/static assets are fresh)..."
+            docker compose --progress=plain -f "$COMPOSE_FILE" build --no-cache
 
-            echo "Starting updated containers..."
-            docker compose -f docker-compose.dev.yml up -d --remove-orphans
+            echo "Starting container..."
+            docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
 
-            echo "Current container status:"
-            docker compose -f docker-compose.dev.yml ps
+            echo "Waiting for app to listen on port $APP_PORT..."
+            for i in $(seq 1 30); do
+              if curl -sf "http://127.0.0.1:${APP_PORT}/login" >/dev/null; then
+                break
+              fi
+              if [ "$i" -eq 30 ]; then
+                echo "ERROR: App did not become ready on port $APP_PORT" >&2
+                docker compose -f "$COMPOSE_FILE" logs --tail=80
+                exit 1
+              fi
+              sleep 2
+            done
+
+            ./scripts/verify-deploy-health.sh "http://127.0.0.1:${APP_PORT}" "$CONTAINER"
+
+            docker compose -f "$COMPOSE_FILE" ps
+            echo "Deploy finished successfully."

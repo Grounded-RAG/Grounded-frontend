@@ -36,6 +36,10 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
+# Fail the image build early if Tailwind/CSS was not emitted (unstyled production UI).
+RUN test -n "$(find .next/static/css -name '*.css' -print -quit 2>/dev/null)" \
+  || (echo "ERROR: next build did not produce .next/static/css/*.css" >&2 && exit 1)
+
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app

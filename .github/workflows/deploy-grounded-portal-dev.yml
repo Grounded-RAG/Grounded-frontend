@@ -11,44 +11,10 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Prepare deploy package
-        run: |
-          rm -rf deploy-package
-          mkdir -p deploy-package
-
-          rsync -a ./ deploy-package/ \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='.next' \
-            --exclude='out' \
-            --exclude='dist' \
-            --exclude='build' \
-            --exclude='coverage' \
-            --exclude='.turbo' \
-            --exclude='.cache' \
-            --exclude='deploy-package'
-
-          du -sh deploy-package
-
-      - name: Upload code to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
-          source: 'deploy-package/*'
-          target: '/home/ubuntu/grounded-portal-dev'
-          strip_components: 1
-          overwrite: true
-          rm: true
+        uses: actions/checkout@v3
 
       - name: SSH into Server and Deploy Grounded Portal
-        uses: appleboy/ssh-action@v1.0.3
-        env:
-          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -56,62 +22,35 @@ jobs:
           port: 22
           command_timeout: 25m
           timeout: 60s
-          envs: NEXT_PUBLIC_API_BASE_URL
           script: |
             set -euo pipefail
 
             APP_DIR="$HOME/grounded-portal-dev"
+            mkdir -p "$APP_DIR"
             cd "$APP_DIR"
 
-            if [ -z "${NEXT_PUBLIC_API_BASE_URL:-}" ]; then
-              echo "Missing or empty required environment variable: NEXT_PUBLIC_API_BASE_URL" >&2
-              exit 1
-            fi
+            # avoid first-time GitHub host prompt
+            mkdir -p "$HOME/.ssh"
+            touch "$HOME/.ssh/known_hosts"
+            grep -q github.com "$HOME/.ssh/known_hosts" || ssh-keyscan -t ed25519 github.com >> "$HOME/.ssh/known_hosts"
 
-            case "$NEXT_PUBLIC_API_BASE_URL" in
-              *localhost*|*127.0.0.1*)
-                echo "ERROR: NEXT_PUBLIC_API_BASE_URL must use the server's public backend URL, not localhost." >&2
-                echo "Example: http://51.20.18.111:8000" >&2
-                exit 1
-                ;;
-            esac
+            # clone OR pull in one command
+            if [ ! -d ".git" ]; then git clone -b refactor/clean-up git@github.com:Grounded-RAG/Grounded-frontend.git .; else git pull origin refactor/clean-up; fi
 
-            {
-              echo "NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
-              echo "API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
-            } > .env
+            # build stamp
+            mkdir -p build/web
+            date +%s > build/web/version.json
 
-            echo "Removing stale local build artifacts..."
-            rm -rf .next out dist build coverage .turbo .cache
+            # Recreate .env file
+            cat <<EOF > .env
+            NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+            API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
 
-            echo "Stopping old containers..."
-            docker compose -f docker-compose.dev.yml down --remove-orphans || true
+            EOF
 
-            echo "Checking Docker..."
-            docker --version
-            docker compose version
-
-            echo "Pulling base image with retries..."
-            for i in 1 2 3; do
-              if docker pull node:20-alpine; then
-                echo "Successfully pulled node:20-alpine"
-                break
-              fi
-
-              if [ "$i" -eq 3 ]; then
-                echo "Failed to pull node:20-alpine after 3 attempts" >&2
-                exit 1
-              fi
-
-              echo "Docker pull failed. Retrying in 10 seconds..."
-              sleep 10
-            done
-
-            echo "Building Docker image from scratch (no cache)..."
-            docker compose --progress=plain -f docker-compose.dev.yml build --no-cache
-
-            echo "Starting updated containers..."
-            docker compose -f docker-compose.dev.yml up -d --remove-orphans
-
-            echo "Current container status:"
-            docker compose -f docker-compose.dev.yml ps
+            # docker compose v2
+            docker compose -f docker-compose.dev.yml down || true
+            docker image prune -f || true
+            docker builder prune -f || true
+            docker compose -f docker-compose.dev.yml build
+            docker compose -f docker-compose.dev.yml up -d

@@ -49,7 +49,7 @@ export function SignUpScreen() {
         workspace_name: organization || "Default workspace",
       });
       acceptEmailAuth(response);
-      router.push(`/app/workspace/${response.workspace_slug}/overview`);
+      router.replace(`/app/workspace/${response.workspace_slug}/overview`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to create account");
     } finally {

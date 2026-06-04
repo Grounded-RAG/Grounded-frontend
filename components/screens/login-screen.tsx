@@ -24,10 +24,10 @@ export function LoginScreen() {
   const appHref = (slug?: string | null) => slug ? `/app/workspace/${slug}/overview` : "/app/overview";
 
   useEffect(() => {
-    if (!isLoading && auth) {
+    if (auth) {
       router.replace(appHref(workspaceSlug));
     }
-  }, [auth, isLoading, router, workspaceSlug]);
+  }, [auth, router, workspaceSlug]);
 
   useEffect(() => {
     if (isProductionApiMisconfigured()) {
@@ -55,7 +55,7 @@ export function LoginScreen() {
     try {
       const response = await signInWithEmail({ email, password });
       acceptEmailAuth(response);
-      router.push(appHref(response.workspace_slug));
+      router.replace(appHref(response.workspace_slug));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to sign in");
     } finally {

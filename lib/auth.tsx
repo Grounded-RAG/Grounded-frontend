@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { getApiMisconfigurationMessage, isProductionApiMisconfigured } from "@/lib/api-base-url";
 import { ApiError, authenticateWithApiKey, listWorkspaces } from "@/lib/api";
 import type { AuthSmokeResponse, EmailAuthResponse, Workspace } from "@/lib/types";
@@ -78,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [workspaceSlug, setWorkspaceSlug] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [restoreError, setRestoreError] = useState<string | null>(null);
+  const freshSessionRef = useRef(false);
 
   useEffect(() => {
     const storedKey = readStorage(API_KEY_STORAGE_KEY);
@@ -131,6 +132,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
         return;
       }
+
+      if (freshSessionRef.current) {
+        freshSessionRef.current = false;
+        setRestoreError(null);
+        if (workspaces.length === 0) {
+          setIsLoading(true);
+          try {
+            const rows = await listWorkspaces(apiKey);
+            if (cancelled) return;
+            setWorkspaces(rows);
+            const storedWorkspaceId = readStorage(WORKSPACE_ID_STORAGE_KEY);
+            const selected =
+              rows.find((workspace) => workspace.workspace_id === storedWorkspaceId) ?? rows[0];
+            if (selected) {
+              setWorkspace(selected.workspace_id, selected.name, selected.slug);
+            }
+          } catch {
+            // Keep the authenticated session even if workspace listing fails.
+          } finally {
+            if (!cancelled) setIsLoading(false);
+          }
+        } else {
+          setIsLoading(false);
+        }
+        return;
+      }
+
       setIsLoading(true);
       setRestoreError(null);
       try {
@@ -171,10 +199,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     void restore();
     return () => { cancelled = true; };
-  }, [apiKey, hydrated, setWorkspace]);
+  }, [apiKey, hydrated, setWorkspace, workspaces.length]);
 
   const signInWithApiKey = useCallback(async (rawApiKey: string) => {
     const trimmed = rawApiKey.trim();
+    freshSessionRef.current = true;
     const authenticated = await authenticateWithApiKey(trimmed);
     writeStorage(API_KEY_STORAGE_KEY, trimmed);
     setApiKey(trimmed);
@@ -188,6 +217,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [setWorkspace]);
 
   const acceptEmailAuth = useCallback((response: EmailAuthResponse) => {
+    freshSessionRef.current = true;
     writeStorage(API_KEY_STORAGE_KEY, response.api_key);
     setApiKey(response.api_key);
     setAuth(response);
@@ -196,6 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [setWorkspace]);
 
   const signOut = useCallback(() => {
+    freshSessionRef.current = false;
     writeStorage(API_KEY_STORAGE_KEY, null);
     setApiKey(null);
     setAuth(null);
